@@ -8,9 +8,11 @@ interface DialogueBoxProps {
   onComplete: () => void
 }
 
+const base = import.meta.env.BASE_URL
+
 function VideoBackground({ speakerId }: { speakerId: string }) {
   const char = characters[speakerId]
-  const src = char?.gender === 'male' ? '/videos/boy.mp4' : '/videos/girl.mp4'
+  const src = char?.gender === 'male' ? `${base}videos/boy.mp4` : `${base}videos/girl.mp4`
   const ref = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {

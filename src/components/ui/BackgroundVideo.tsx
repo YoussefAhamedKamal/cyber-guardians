@@ -1,5 +1,7 @@
 import { useRef, useEffect } from 'react'
 
+const base = import.meta.env.BASE_URL
+
 interface Props {
   blur?: number
   overlayColor?: string
@@ -19,7 +21,7 @@ export function BackgroundVideo({ blur = 0, overlayColor = '#0a0a1a', overlayOpa
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
       <video
         ref={ref} muted loop playsInline
-        src="/videos/background.mp4"
+        src={`${base}videos/background.mp4`}
         style={{
           width: '100%', height: '100%', objectFit: 'cover',
           filter: blur ? `blur(${blur}px)` : undefined,

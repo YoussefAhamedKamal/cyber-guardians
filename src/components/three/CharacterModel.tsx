@@ -71,11 +71,13 @@ function VideoCharacter({ src, color, talking }: { src: string; color: string; t
   )
 }
 
+const base = import.meta.env.BASE_URL
+
 export function CharacterModel({ characterId, position = [0, 0, 0], talking = false }: Props) {
   const char = characters[characterId]
   const color = char?.color ?? '#4FC3F7'
   const gender = char?.gender ?? 'male'
-  const videoSrc = gender === 'male' ? '/videos/boy.mp4' : '/videos/girl.mp4'
+  const videoSrc = gender === 'male' ? `${base}videos/boy.mp4` : `${base}videos/girl.mp4`
 
   return (
     <Float speed={1.2} floatIntensity={0.25} rotationIntensity={0.15}>
