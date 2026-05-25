@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback } from 'react'
 import type { MazeCell } from '@/types'
 import { Button } from '@/components/ui'
 import { audio } from '@/systems/ProceduralAudio'
@@ -9,80 +9,163 @@ interface Props {
 }
 
 export function MazeChallenge({ grid, onComplete }: Props) {
+  const size = grid.length
+
+  const initialMalware = grid
+    .flat()
+    .filter((c) => c.isMalware)
+    .map((c) => ({ x: c.x, y: c.y }))
+
   const [player, setPlayer] = useState({ x: 0, y: 0 })
-  const caughtRef = useRef(0)
-  const [caught, setCaught] = useState(0)
-  const [totalMalware] = useState(() =>
-    grid.flat().filter((c) => c.isMalware).length
-  )
+  const [malware, setMalware] = useState(initialMalware)
+  const [secured, setSecured] = useState(0)
+  const totalMalware = initialMalware.length
   const [done, setDone] = useState(false)
+
+  const isBlocked = (x: number, y: number) => {
+    const cell = grid[y]?.[x]
+    if (!cell) return true
+    if (cell.isWall) return true
+    if (malware.some((m) => m.x === x && m.y === y)) return true
+    return false
+  }
 
   const move = useCallback((dx: number, dy: number) => {
     if (done) return
     setPlayer((prev) => {
       const nx = prev.x + dx
       const ny = prev.y + dy
-      const next = grid[ny]?.[nx]
-      if (!next || next.isWall) return prev
-      if (next.isMalware) {
+      const target = grid[ny]?.[nx]
+      if (!target || target.isWall) return prev
+
+      const hitMalware = malware.find((m) => m.x === nx && m.y === ny)
+      if (hitMalware) {
+        const pushX = nx + dx
+        const pushY = ny + dy
+        const pushTarget = grid[pushY]?.[pushX]
+        if (!pushTarget || pushTarget.isWall) return prev
+
+        setMalware((prevMal) => {
+          const updated = prevMal.map((m) =>
+            m.x === hitMalware.x && m.y === hitMalware.y
+              ? { x: pushX, y: pushY }
+              : m
+          )
+          if (pushTarget.isEndpoint) {
+            audio.playLevelUp()
+            setSecured((s) => {
+              const next = s + 1
+              if (next >= totalMalware) {
+                setTimeout(() => setDone(true), 400)
+              }
+              return next
+            })
+            return updated.filter((m) => !(m.x === pushX && m.y === pushY))
+          }
+          return updated
+        })
         audio.playCorrect()
-        caughtRef.current++
-        setCaught(caughtRef.current)
+        return { x: nx, y: ny }
       }
-      if (next.isEndpoint && caughtRef.current >= totalMalware) {
-        audio.playLevelUp()
-        setTimeout(() => setDone(true), 300)
-      }
+
       return { x: nx, y: ny }
     })
-  }, [done, grid, totalMalware])
+  }, [done, malware, grid, totalMalware])
 
-  const size = grid.length
+  const isEndpoint = (x: number, y: number) =>
+    grid[y]?.[x]?.isEndpoint ?? false
 
   if (done) {
-    const score = totalMalware > 0 ? Math.round((caught / totalMalware) * 100) : 100
+    const score = 100
     return (
       <div style={{ textAlign: 'center', padding: '32px' }}>
-        <div style={{ fontSize: '48px', marginBottom: '16px' }}>🦠</div>
-        <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>تم التعقب والعزل!</h3>
-        <p style={{ color: '#aaa', marginBottom: '8px' }}>ملفات خبيثة مُعزلة: {caught} من {totalMalware}</p>
+        <div style={{ fontSize: '48px', marginBottom: '16px' }}>&#x1F6E1;</div>
+        <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>تم تطهير الشبكة!</h3>
+        <p style={{ color: '#aaa', marginBottom: '8px' }}>
+          جميع الملفات الخبيثة معزولة: {secured} من {totalMalware}
+        </p>
         <Button onClick={() => onComplete(score)}>متابعة</Button>
       </div>
     )
   }
 
+  const cellSize = 56
+
   return (
-    <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+    <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
       <div style={{ color: '#888', fontSize: '14px' }}>
-        🎯 اصطد الملفات الخبيثة (🔴) وصولاً لنقطة الأمان (🟢)
+        &#x1F3AF; ادفع الملفات الخبيثة (<span style={{ color: '#E57373' }}>&#x25CF;</span>) إلى نقطة الأمان (<span style={{ color: '#81C784' }}>&#x25C9;</span>)
       </div>
-      <div style={{ display: 'grid', gap: '4px', direction: 'ltr', gridTemplateColumns: `repeat(${size}, 1fr)` }}>
+      <div style={{ color: '#E57373', fontSize: '13px' }}>
+        معزول: {secured} / {totalMalware}
+      </div>
+      <div
+        style={{
+          display: 'grid', gap: '4px', direction: 'ltr',
+          gridTemplateColumns: `repeat(${size}, ${cellSize}px)`,
+        }}
+      >
         {grid.map((row, y) =>
           row.map((c, x) => {
             const isPlayer = player.x === x && player.y === y
+            const isMalwareHere = malware.some((m) => m.x === x && m.y === y)
+            const wall = c.isWall
+            const ep = c.isEndpoint
+
+            let bg = 'rgba(255,255,255,0.05)'
+            let border = '2px solid transparent'
+            let content = ''
+
+            if (wall) {
+              bg = '#2a2a3e'
+              content = '&#x25A3;'
+            } else if (isMalwareHere) {
+              bg = 'rgba(229,115,115,0.2)'
+              border = '2px solid #E57373'
+              content = '&#x25CF;'
+            } else if (ep) {
+              bg = 'rgba(129,199,132,0.15)'
+              border = '2px solid #81C784'
+              content = '&#x25C9;'
+            }
+
+            if (isPlayer) {
+              bg = 'rgba(79,195,247,0.25)'
+              border = '2px solid #4FC3F7'
+              content = '&#x25D8;'
+            }
+
             return (
-              <div key={`${x}-${y}`} style={{
-                width: '50px', height: '50px', borderRadius: '8px', display: 'flex',
-                alignItems: 'center', justifyContent: 'center', fontSize: '20px',
-                background: c.isWall ? '#333' : isPlayer ? '#4FC3F7' : 'rgba(255,255,255,0.05)',
-                border: `2px solid ${c.isEndpoint ? '#81C784' : isPlayer ? '#4FC3F7' : 'transparent'}`,
-              }}>
-                {isPlayer ? '🧑‍💻' : c.isWall ? '🧱' : c.isEndpoint ? '🟢' : c.isMalware ? '🔴' : ''}
-              </div>
+              <div
+                key={`${x}-${y}`}
+                style={{
+                  width: `${cellSize}px`,
+                  height: `${cellSize}px`,
+                  borderRadius: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '22px',
+                  background: bg,
+                  border,
+                  transition: 'all 0.15s',
+                }}
+                dangerouslySetInnerHTML={{ __html: content }}
+              />
             )
           })
         )}
       </div>
       <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
         <div style={{ display: 'flex', gap: '8px', width: '100%', justifyContent: 'center' }}>
-          <button onClick={() => move(0, -1)} style={arrowStyle}>↑</button>
+          <button onClick={() => move(0, -1)} style={arrowStyle}>&#x25B2;</button>
         </div>
         <div style={{ display: 'flex', gap: '8px', width: '100%', justifyContent: 'center' }}>
-          <button onClick={() => move(-1, 0)} style={arrowStyle}>←</button>
-          <button onClick={() => move(1, 0)} style={arrowStyle}>→</button>
+          <button onClick={() => move(-1, 0)} style={arrowStyle}>&#x25C0;</button>
+          <button onClick={() => move(1, 0)} style={arrowStyle}>&#x25B6;</button>
         </div>
         <div style={{ display: 'flex', gap: '8px', width: '100%', justifyContent: 'center' }}>
-          <button onClick={() => move(0, 1)} style={arrowStyle}>↓</button>
+          <button onClick={() => move(0, 1)} style={arrowStyle}>&#x25BC;</button>
         </div>
       </div>
     </div>
