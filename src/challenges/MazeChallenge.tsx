@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import type { MazeCell } from '@/types'
 import { Button } from '@/components/ui'
 import { audio } from '@/systems/ProceduralAudio'
@@ -10,33 +10,26 @@ interface Props {
 
 export function MazeChallenge({ grid, onComplete }: Props) {
   const [player, setPlayer] = useState({ x: 0, y: 0 })
+  const caughtRef = useRef(0)
   const [caught, setCaught] = useState(0)
-  const [totalMalware, setTotal] = useState(() =>
+  const [totalMalware] = useState(() =>
     grid.flat().filter((c) => c.isMalware).length
   )
   const [done, setDone] = useState(false)
-
-  const cell = grid[player.y]?.[player.x]
-  const isAtEndpoint = cell?.isEndpoint
 
   const move = useCallback((dx: number, dy: number) => {
     if (done) return
     setPlayer((prev) => {
       const nx = prev.x + dx
       const ny = prev.y + dy
-      const target = grid[ny]?.[nx]
-      if (!target || target.isWall) return prev
-      if (target.isMalware) {
+      const next = grid[ny]?.[nx]
+      if (!next || next.isWall) return prev
+      if (next.isMalware) {
         audio.playCorrect()
-        setCaught((c) => {
-          const next = c + 1
-          if (next >= totalMalware && target.isEndpoint) {
-            setTimeout(() => setDone(true), 300)
-          }
-          return next
-        })
+        caughtRef.current++
+        setCaught(caughtRef.current)
       }
-      if (target.isEndpoint) {
+      if (next.isEndpoint && caughtRef.current >= totalMalware) {
         audio.playLevelUp()
         setTimeout(() => setDone(true), 300)
       }
