@@ -1,35 +1,64 @@
 import { useRef, useEffect } from 'react'
+import { useSettingsStore } from '@/store'
 
 const base = import.meta.env.BASE_URL
 
 interface Props {
   blur?: number
-  overlayColor?: string
   overlayOpacity?: number
 }
 
-export function BackgroundVideo({ blur = 0, overlayColor = '#0a0a1a', overlayOpacity = 0.6 }: Props) {
-  const ref = useRef<HTMLVideoElement>(null)
+export function BackgroundVideo({ blur = 0, overlayOpacity = 0.6 }: Props) {
+  const s = useSettingsStore()
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const imgRef = useRef<HTMLImageElement>(null)
+
+  const useCustomAnim = s.bgAnimationUrl.length > 0
+  const isGif = useCustomAnim && s.bgAnimationUrl.startsWith('data:image/gif')
 
   useEffect(() => {
-    const el = ref.current
-    if (!el) return
+    const el = videoRef.current
+    if (!el || !useCustomAnim || isGif) return
     el.play().catch(() => {})
-  }, [])
+  }, [useCustomAnim, isGif, s.bgAnimationUrl])
+
+  const brightness = useCustomAnim ? s.bgAnimationBrightness : s.bgBrightness
 
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
-      <video
-        ref={ref} muted loop playsInline
-        src={`${base}videos/background.mp4`}
-        style={{
-          width: '100%', height: '100%', objectFit: 'cover',
-          filter: blur ? `blur(${blur}px)` : undefined,
-        }}
-      />
+      {useCustomAnim ? (
+        isGif ? (
+          <img
+            ref={imgRef}
+            src={s.bgAnimationUrl}
+            style={{
+              width: '100%', height: '100%', objectFit: 'cover',
+              filter: `brightness(${brightness})${blur ? ` blur(${blur}px)` : ''}`,
+            }}
+          />
+        ) : (
+          <video
+            ref={videoRef} muted loop playsInline autoPlay
+            src={s.bgAnimationUrl}
+            style={{
+              width: '100%', height: '100%', objectFit: 'cover',
+              filter: `brightness(${brightness})${blur ? ` blur(${blur}px)` : ''}`,
+            }}
+          />
+        )
+      ) : (
+        <video
+          ref={videoRef} muted loop playsInline
+          src={`${base}videos/background.mp4`}
+          style={{
+            width: '100%', height: '100%', objectFit: 'cover',
+            filter: `brightness(${brightness})${blur ? ` blur(${blur}px)` : ''}`,
+          }}
+        />
+      )}
       <div style={{
         position: 'absolute', inset: 0,
-        background: overlayColor,
+        background: s.bgColor,
         opacity: overlayOpacity,
       }} />
     </div>
