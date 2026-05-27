@@ -14,7 +14,7 @@ const inputStyle: React.CSSProperties = {
   border: '1px solid rgba(255,255,255,0.2)',
 }
 
-const labelStyle: React.CSSProperties = { color: '#aaa', fontSize: '14px' }
+const labelStyle: React.CSSProperties = { color: '#aaa', fontSize: '13px' }
 
 const removeBtn: React.CSSProperties = {
   background: 'rgba(229,115,115,0.15)', border: '1px solid #E57373',
@@ -22,7 +22,15 @@ const removeBtn: React.CSSProperties = {
   cursor: 'pointer', fontSize: '13px',
 }
 
-type FileHandler = (url: string) => void
+const rowStyle: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.03)',
+  borderRadius: '12px',
+  border: '1px solid rgba(255,255,255,0.06)',
+  padding: '16px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '8px',
+}
 
 function FileUploadRow({
   label, accept, currentUrl, onUpload, onRemove, maxSize,
@@ -30,7 +38,7 @@ function FileUploadRow({
   label: string
   accept: string
   currentUrl: string
-  onUpload: FileHandler
+  onUpload: (url: string) => void
   onRemove: () => void
   maxSize: number
 }) {
@@ -50,183 +58,253 @@ function FileUploadRow({
     <div>
       <label style={labelStyle}>{label}</label>
       <div style={{ display: 'flex', gap: '8px', marginTop: '6px', alignItems: 'center' }}>
-        <input
-          ref={ref} type="file" accept={accept}
-          onChange={handleFile} style={{ display: 'none' }}
-        />
+        <input ref={ref} type="file" accept={accept} onChange={handleFile} style={{ display: 'none' }} />
         <Button variant="secondary" onClick={() => ref.current?.click()}>
           {currentUrl ? 'تغيير' : 'رفع ملف'}
         </Button>
-        {currentUrl && (
-          <button onClick={onRemove} style={removeBtn}>إزالة</button>
-        )}
+        {currentUrl && <button onClick={onRemove} style={removeBtn}>إزالة</button>}
       </div>
-      {currentUrl && (
-        <div style={{ color: '#81C784', fontSize: '12px', marginTop: '4px' }}>✓ تم الرفع</div>
-      )}
+      {currentUrl && <div style={{ color: '#81C784', fontSize: '12px', marginTop: '4px' }}>✓ تم الرفع</div>}
     </div>
   )
 }
 
-function SectionTitle({ children }: { children: string }) {
-  return (
-    <div style={{
-      color: '#4FC3F7', fontSize: '15px', fontWeight: 700,
-      borderBottom: '1px solid rgba(79,195,247,0.2)',
-      paddingBottom: '6px', marginTop: '8px',
-    }}>
-      {children}
-    </div>
-  )
-}
+const TABS = ['الصوت', 'العرض', 'الخطوط', 'الفيديو', 'عام'] as const
+type Tab = (typeof TABS)[number]
 
 export function SettingsPanel({ onBack }: Props) {
   const s = useSettingsStore()
+  const [tab, setTab] = useState<Tab>('الصوت')
   const [showShortcuts, setShowShortcuts] = useState(false)
+
+  const tabBar = (
+    <div style={{
+      display: 'flex', gap: '4px', flexShrink: 0, flexWrap: 'wrap',
+      justifyContent: 'center', marginBottom: '8px',
+    }}>
+      {TABS.map((t) => (
+        <button
+          key={t}
+          onClick={() => setTab(t)}
+          style={{
+            padding: '8px 18px', borderRadius: '20px', border: 'none',
+            background: tab === t ? '#4FC3F7' : 'rgba(255,255,255,0.08)',
+            color: tab === t ? '#0a0a1a' : '#aaa',
+            fontSize: '14px', fontWeight: 700, cursor: 'pointer',
+          }}
+        >
+          {t}
+        </button>
+      ))}
+    </div>
+  )
+
+  const content = () => {
+    switch (tab) {
+      case 'الصوت':
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={rowStyle}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <label style={labelStyle}>الموسيقى الخلفية</label>
+                <span style={{ color: '#4FC3F7', fontSize: '14px', fontWeight: 700 }}>
+                  {Math.round(s.bgmVolume * 100)}%
+                </span>
+              </div>
+              <input type="range" min={0} max={2} step={0.05} value={s.bgmVolume}
+                onChange={(e) => s.setBgmVolume(+e.target.value)} style={{ width: '100%' }} />
+            </div>
+            <div style={rowStyle}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <label style={labelStyle}>المؤثرات الصوتية</label>
+                <span style={{ color: '#4FC3F7', fontSize: '14px', fontWeight: 700 }}>
+                  {Math.round(s.sfxVolume * 100)}%
+                </span>
+              </div>
+              <input type="range" min={0} max={2} step={0.05} value={s.sfxVolume}
+                onChange={(e) => s.setSfxVolume(+e.target.value)} style={{ width: '100%' }} />
+            </div>
+            <div style={rowStyle}>
+              <FileUploadRow
+                label="موسيقى خلفية مخصصة"
+                accept="audio/*"
+                currentUrl={s.customBgUrl}
+                onUpload={s.setCustomBgUrl}
+                onRemove={() => s.setCustomBgUrl('')}
+                maxSize={MAX_VIDEO_SIZE}
+              />
+            </div>
+          </div>
+        )
+
+      case 'العرض':
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={rowStyle}>
+              <label style={labelStyle}>لون الخلفية</label>
+              <input type="color" value={s.bgColor}
+                onChange={(e) => s.setBgColor(e.target.value)}
+                style={{ ...inputStyle, padding: '4px', height: '40px' }} />
+            </div>
+            <div style={rowStyle}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <label style={labelStyle}>سطوع الخلفية</label>
+                <span style={{ color: '#4FC3F7', fontSize: '14px', fontWeight: 700 }}>
+                  {Math.round(s.bgBrightness * 100)}%
+                </span>
+              </div>
+              <input type="range" min={0.1} max={2} step={0.05} value={s.bgBrightness}
+                onChange={(e) => s.setBgBrightness(+e.target.value)} style={{ width: '100%' }} />
+            </div>
+            <div style={rowStyle}>
+              <FileUploadRow
+                label="خلفية متحركة (GIF/فيديو)"
+                accept="video/*,image/gif"
+                currentUrl={s.bgAnimationUrl}
+                onUpload={s.setBgAnimationUrl}
+                onRemove={() => s.setBgAnimationUrl('')}
+                maxSize={MAX_ANIMATION_SIZE}
+              />
+              {s.bgAnimationUrl && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <label style={labelStyle}>سطوع الخلفية المتحركة</label>
+                    <span style={{ color: '#4FC3F7', fontSize: '14px', fontWeight: 700 }}>
+                      {Math.round(s.bgAnimationBrightness * 100)}%
+                    </span>
+                  </div>
+                  <input type="range" min={0} max={1} step={0.05} value={s.bgAnimationBrightness}
+                    onChange={(e) => s.setBgAnimationBrightness(+e.target.value)} style={{ width: '100%' }} />
+                </div>
+              )}
+            </div>
+            <div style={rowStyle}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <label style={labelStyle}>نصف قطر الحدود</label>
+                <span style={{ color: '#4FC3F7', fontSize: '14px', fontWeight: 700 }}>{s.borderRadius}px</span>
+              </div>
+              <input type="range" min={0} max={32} step={1} value={s.borderRadius}
+                onChange={(e) => s.setBorderRadius(+e.target.value)} style={{ width: '100%' }} />
+            </div>
+            <div style={rowStyle}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <label style={labelStyle}>سماكة الحدود</label>
+                <span style={{ color: '#4FC3F7', fontSize: '14px', fontWeight: 700 }}>{s.borderWidth}px</span>
+              </div>
+              <input type="range" min={0} max={6} step={1} value={s.borderWidth}
+                onChange={(e) => s.setBorderWidth(+e.target.value)} style={{ width: '100%' }} />
+            </div>
+            <div style={rowStyle}>
+              <label style={labelStyle}>لون الحدود</label>
+              <input type="color" value={s.borderColor}
+                onChange={(e) => s.setBorderColor(e.target.value)}
+                style={{ ...inputStyle, padding: '4px', height: '40px' }} />
+            </div>
+          </div>
+        )
+
+      case 'الخطوط':
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={rowStyle}>
+              <label style={labelStyle}>نوع الخط</label>
+              <select value={s.fontFamily}
+                onChange={(e) => s.setFontFamily(e.target.value)} style={inputStyle}>
+                {FONT_OPTIONS.map((f) => (<option key={f} value={f}>{f}</option>))}
+              </select>
+            </div>
+            <div style={rowStyle}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <label style={labelStyle}>حجم الخط</label>
+                <span style={{ color: '#4FC3F7', fontSize: '14px', fontWeight: 700 }}>{s.fontSize}px</span>
+              </div>
+              <input type="range" min={12} max={28} step={1} value={s.fontSize}
+                onChange={(e) => s.setFontSize(+e.target.value)} style={{ width: '100%' }} />
+            </div>
+            <div style={rowStyle}>
+              <label style={labelStyle}>لون الخط</label>
+              <input type="color" value={s.fontColor}
+                onChange={(e) => s.setFontColor(e.target.value)}
+                style={{ ...inputStyle, padding: '4px', height: '40px' }} />
+            </div>
+          </div>
+        )
+
+      case 'الفيديو':
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={rowStyle}>
+              <FileUploadRow
+                label="فيديو الشخصية الذكور (بديل boy.mp4)"
+                accept="video/*"
+                currentUrl={s.customBoyVideoUrl}
+                onUpload={s.setCustomBoyVideoUrl}
+                onRemove={() => s.setCustomBoyVideoUrl('')}
+                maxSize={MAX_VIDEO_SIZE}
+              />
+            </div>
+            <div style={rowStyle}>
+              <FileUploadRow
+                label="فيديو الشخصية الأنثى (بديل girl.mp4)"
+                accept="video/*"
+                currentUrl={s.customGirlVideoUrl}
+                onUpload={s.setCustomGirlVideoUrl}
+                onRemove={() => s.setCustomGirlVideoUrl('')}
+                maxSize={MAX_VIDEO_SIZE}
+              />
+            </div>
+          </div>
+        )
+
+      case 'عام':
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={rowStyle}>
+              <label style={labelStyle}>جودة الرسوم</label>
+              <select value={s.qualityPreset}
+                onChange={(e) => s.setQuality(e.target.value as 'low' | 'medium' | 'high')}
+                style={inputStyle}>
+                <option value="low">منخفضة</option>
+                <option value="medium">متوسطة</option>
+                <option value="high">عالية</option>
+              </select>
+            </div>
+            <div style={rowStyle}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#aaa', cursor: 'pointer' }}>
+                <input type="checkbox" checked={s.accessibilityMode}
+                  onChange={() => s.toggleAccessibility()} />
+                وضع الوصول السهل
+              </label>
+            </div>
+            <div style={rowStyle}>
+              <Button onClick={() => setShowShortcuts(true)} style={{ width: '100%', textAlign: 'center' }}>
+                اختصارات لوحة المفاتيح
+              </Button>
+            </div>
+            <div style={rowStyle}>
+              <Button variant="secondary" onClick={s.resetAll} style={{ width: '100%', textAlign: 'center' }}>
+                إعادة الإعدادات الافتراضية
+              </Button>
+            </div>
+          </div>
+        )
+    }
+  }
 
   return (
     <div style={{
       display: 'flex', flexDirection: 'column', alignItems: 'center',
-      justifyContent: 'flex-start', height: '100%', gap: '12px', padding: '24px 32px',
-      position: 'relative', zIndex: 1, overflow: 'auto',
+      height: '100%', padding: '20px 16px',
+      position: 'relative', zIndex: 1,
     }}>
-      <h2 style={{ fontSize: '28px', margin: 0, flexShrink: 0 }}>الإعدادات</h2>
-
-      <div style={{ width: '100%', maxWidth: '480px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-
-        <SectionTitle>الصوت</SectionTitle>
-        <div>
-          <label style={labelStyle}>الموسيقى الخلفية: {Math.round(s.bgmVolume * 100)}%</label>
-          <input type="range" min={0} max={2} step={0.05} value={s.bgmVolume}
-            onChange={(e) => s.setBgmVolume(+e.target.value)} style={{ width: '100%' }} />
-        </div>
-        <div>
-          <label style={labelStyle}>المؤثرات الصوتية: {Math.round(s.sfxVolume * 100)}%</label>
-          <input type="range" min={0} max={2} step={0.05} value={s.sfxVolume}
-            onChange={(e) => s.setSfxVolume(+e.target.value)} style={{ width: '100%' }} />
-        </div>
-        <FileUploadRow
-          label="موسيقى خلفية مخصصة"
-          accept="audio/*"
-          currentUrl={s.customBgUrl}
-          onUpload={s.setCustomBgUrl}
-          onRemove={() => s.setCustomBgUrl('')}
-          maxSize={MAX_VIDEO_SIZE}
-        />
-
-        <SectionTitle>الخطوط</SectionTitle>
-        <div>
-          <label style={labelStyle}>نوع الخط</label>
-          <select value={s.fontFamily}
-            onChange={(e) => s.setFontFamily(e.target.value)} style={inputStyle}>
-            {FONT_OPTIONS.map((f) => (<option key={f} value={f}>{f}</option>))}
-          </select>
-        </div>
-        <div>
-          <label style={labelStyle}>حجم الخط: {s.fontSize}px</label>
-          <input type="range" min={12} max={28} step={1} value={s.fontSize}
-            onChange={(e) => s.setFontSize(+e.target.value)} style={{ width: '100%' }} />
-        </div>
-        <div>
-          <label style={labelStyle}>لون الخط</label>
-          <input type="color" value={s.fontColor}
-            onChange={(e) => s.setFontColor(e.target.value)}
-            style={{ ...inputStyle, padding: '4px', height: '40px' }} />
-        </div>
-
-        <SectionTitle>الحدود</SectionTitle>
-        <div>
-          <label style={labelStyle}>نصف قطر الحدود: {s.borderRadius}px</label>
-          <input type="range" min={0} max={32} step={1} value={s.borderRadius}
-            onChange={(e) => s.setBorderRadius(+e.target.value)} style={{ width: '100%' }} />
-        </div>
-        <div>
-          <label style={labelStyle}>سماكة الحدود: {s.borderWidth}px</label>
-          <input type="range" min={0} max={6} step={1} value={s.borderWidth}
-            onChange={(e) => s.setBorderWidth(+e.target.value)} style={{ width: '100%' }} />
-        </div>
-        <div>
-          <label style={labelStyle}>لون الحدود</label>
-          <input type="color" value={s.borderColor}
-            onChange={(e) => s.setBorderColor(e.target.value)}
-            style={{ ...inputStyle, padding: '4px', height: '40px' }} />
-        </div>
-
-        <SectionTitle>الخلفية</SectionTitle>
-        <div>
-          <label style={labelStyle}>لون الخلفية</label>
-          <input type="color" value={s.bgColor}
-            onChange={(e) => s.setBgColor(e.target.value)}
-            style={{ ...inputStyle, padding: '4px', height: '40px' }} />
-        </div>
-        <div>
-          <label style={labelStyle}>سطوع الخلفية: {Math.round(s.bgBrightness * 100)}%</label>
-          <input type="range" min={0.1} max={2} step={0.05} value={s.bgBrightness}
-            onChange={(e) => s.setBgBrightness(+e.target.value)} style={{ width: '100%' }} />
-        </div>
-        <FileUploadRow
-          label="خلفية متحركة (GIF/فيديو)"
-          accept="video/*,image/gif"
-          currentUrl={s.bgAnimationUrl}
-          onUpload={s.setBgAnimationUrl}
-          onRemove={() => s.setBgAnimationUrl('')}
-          maxSize={MAX_ANIMATION_SIZE}
-        />
-        {s.bgAnimationUrl && (
-          <div>
-            <label style={labelStyle}>سطوع الخلفية المتحركة: {Math.round(s.bgAnimationBrightness * 100)}%</label>
-            <input type="range" min={0} max={1} step={0.05} value={s.bgAnimationBrightness}
-              onChange={(e) => s.setBgAnimationBrightness(+e.target.value)} style={{ width: '100%' }} />
-          </div>
-        )}
-
-        <SectionTitle>فيديو الشخصيات</SectionTitle>
-        <FileUploadRow
-          label="فيديو الشخصية الذكور (boy)"
-          accept="video/*"
-          currentUrl={s.customBoyVideoUrl}
-          onUpload={s.setCustomBoyVideoUrl}
-          onRemove={() => s.setCustomBoyVideoUrl('')}
-          maxSize={MAX_VIDEO_SIZE}
-        />
-        <FileUploadRow
-          label="فيديو الشخصية الأنثى (girl)"
-          accept="video/*"
-          currentUrl={s.customGirlVideoUrl}
-          onUpload={s.setCustomGirlVideoUrl}
-          onRemove={() => s.setCustomGirlVideoUrl('')}
-          maxSize={MAX_VIDEO_SIZE}
-        />
-
-        <SectionTitle>أخرى</SectionTitle>
-        <div>
-          <label style={labelStyle}>جودة الرسوم</label>
-          <select value={s.qualityPreset}
-            onChange={(e) => s.setQuality(e.target.value as 'low' | 'medium' | 'high')}
-            style={inputStyle}>
-            <option value="low">منخفضة</option>
-            <option value="medium">متوسطة</option>
-            <option value="high">عالية</option>
-          </select>
-        </div>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#aaa' }}>
-          <input type="checkbox" checked={s.accessibilityMode}
-            onChange={() => s.toggleAccessibility()} />
-          وضع الوصول السهل
-        </label>
-
+      <h2 style={{ fontSize: '26px', margin: '0 0 12px', flexShrink: 0 }}>الإعدادات</h2>
+      {tabBar}
+      <div style={{ flex: 1, overflow: 'auto', width: '100%', maxWidth: '480px' }}>
+        {content()}
       </div>
-
-      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-        <Button variant="primary" onClick={() => setShowShortcuts(true)}>
-          اختصارات لوحة المفاتيح
-        </Button>
-        <Button variant="secondary" onClick={s.resetAll}>
-          إعادة الإعدادات الافتراضية
-        </Button>
+      <div style={{ marginTop: '12px', flexShrink: 0 }}>
         <Button variant="ghost" onClick={onBack}>الرجوع</Button>
       </div>
-
       {showShortcuts && <KeyboardShortcuts onClose={() => setShowShortcuts(false)} />}
     </div>
   )

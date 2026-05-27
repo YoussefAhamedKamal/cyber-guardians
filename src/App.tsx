@@ -33,12 +33,19 @@ export function App() {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'm' || e.key === 'M') {
+        e.preventDefault()
         settings.toggleMute()
+      }
+      if (e.key === 'Escape') {
+        if (screen !== 'menu') {
+          e.preventDefault()
+          setScreen('menu')
+        }
       }
     }
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
-  }, [settings])
+  }, [settings, screen])
 
   const handleStart = useCallback(() => {
     audio.playClick()
