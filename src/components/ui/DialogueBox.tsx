@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import type { DialogueLine } from '@/types'
 import { characters } from '@/data'
 import { audio } from '@/systems/ProceduralAudio'
+import { useSettingsStore } from '@/store'
 
 interface DialogueBoxProps {
   lines: DialogueLine[]
@@ -12,7 +13,13 @@ const base = import.meta.env.BASE_URL
 
 function VideoBackground({ speakerId }: { speakerId: string }) {
   const char = characters[speakerId]
-  const src = char?.gender === 'male' ? `${base}videos/boy.mp4` : `${base}videos/girl.mp4`
+  const settings = useSettingsStore()
+  const customBoy = settings.customBoyVideoUrl
+  const customGirl = settings.customGirlVideoUrl
+
+  const src = char?.gender === 'male'
+    ? (customBoy || `${base}videos/boy.mp4`)
+    : (customGirl || `${base}videos/girl.mp4`)
   const ref = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {

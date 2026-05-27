@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useResponsive } from '@/hooks'
-import { Button, ProgressBar, DialogueBox, BackgroundVideo } from '@/components/ui'
+import { Button, ProgressBar, DialogueBox, BackgroundVideo, SettingsPanel } from '@/components/ui'
 import { GameCanvas, Environment } from '@/components/three'
 import { useGameStore, useSettingsStore } from '@/store'
 import { levels } from '@/data'
@@ -29,6 +29,16 @@ export function App() {
     }
     return () => stop()
   }, [settings.bgmVolume, settings.muted, settings.customBgUrl])
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'm' || e.key === 'M') {
+        settings.toggleMute()
+      }
+    }
+    window.addEventListener('keydown', handleKey)
+    return () => window.removeEventListener('keydown', handleKey)
+  }, [settings])
 
   const handleStart = useCallback(() => {
     audio.playClick()
@@ -69,28 +79,20 @@ export function App() {
     height: responsive.height,
     position: 'relative',
     overflow: 'hidden',
-    background: '#0a0a1a',
-    color: '#fff',
-    fontFamily: "'Segoe UI', 'Cairo', sans-serif",
+    background: settings.bgColor,
+    color: settings.fontColor,
+    fontFamily: `'${settings.fontFamily}', 'Segoe UI', sans-serif`,
     direction: 'rtl',
-  }
+    '--custom-brightness': settings.bgBrightness,
+    '--custom-border-radius': `${settings.borderRadius}px`,
+    '--custom-border-color': settings.borderColor,
+    '--custom-border-width': `${settings.borderWidth}px`,
+  } as React.CSSProperties & Record<string, string | number>
 
   const titleGradient: React.CSSProperties = {
     background: 'linear-gradient(135deg, #4FC3F7, #CE93D8)',
     WebkitBackgroundClip: 'text',
     WebkitTextFillColor: 'transparent',
-  }
-
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleBgUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = () => {
-      settings.setCustomBgUrl(reader.result as string)
-    }
-    reader.readAsDataURL(file)
   }
 
   return (
@@ -184,81 +186,7 @@ export function App() {
       )}
 
       {screen === 'settings' && (
-        <div style={{
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-          justifyContent: 'center', height: '100%', gap: '20px', padding: '32px',
-          position: 'relative', zIndex: 1,
-        }}>
-          <h2 style={{ fontSize: '32px', margin: 0 }}>الإعدادات</h2>
-          <div style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div>
-              <label style={{ color: '#aaa', fontSize: '14px' }}>الصوت الخلفي: {Math.round(settings.bgmVolume * 100)}%</label>
-              <input type="range" min={0} max={1} step={0.1} value={settings.bgmVolume}
-                onChange={(e) => settings.setBgmVolume(+e.target.value)}
-                style={{ width: '100%' }} />
-            </div>
-            <div>
-              <label style={{ color: '#aaa', fontSize: '14px' }}>المؤثرات: {Math.round(settings.sfxVolume * 100)}%</label>
-              <input type="range" min={0} max={1} step={0.1} value={settings.sfxVolume}
-                onChange={(e) => settings.setSfxVolume(+e.target.value)}
-                style={{ width: '100%' }} />
-            </div>
-            <div>
-              <label style={{ color: '#aaa', fontSize: '14px' }}>جودة الرسوم</label>
-              <select value={settings.qualityPreset}
-                onChange={(e) => settings.setQuality(e.target.value as 'low' | 'medium' | 'high')}
-                style={{ width: '100%', padding: '8px', borderRadius: '8px', background: '#1a1a2e', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' }}>
-                <option value="low">منخفضة</option>
-                <option value="medium">متوسطة</option>
-                <option value="high">عالية</option>
-              </select>
-            </div>
-            <div>
-              <label style={{ color: '#aaa', fontSize: '14px' }}>حجم الخط: {settings.fontSize}px</label>
-              <input type="range" min={12} max={28} step={1} value={settings.fontSize}
-                onChange={(e) => settings.setFontSize(+e.target.value)}
-                style={{ width: '100%' }} />
-            </div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#aaa' }}>
-              <input type="checkbox" checked={settings.accessibilityMode}
-                onChange={() => settings.toggleAccessibility()} />
-              وضع الوصول السهل
-            </label>
-            <div>
-              <label style={{ color: '#aaa', fontSize: '14px' }}>موسيقى خلفية مخصصة</label>
-              <div style={{ display: 'flex', gap: '8px', marginTop: '6px', alignItems: 'center' }}>
-                <input
-                  ref={fileInputRef}
-                  type="file" accept="audio/*"
-                  onChange={handleBgUpload}
-                  style={{ display: 'none' }}
-                />
-                <Button variant="secondary" onClick={() => fileInputRef.current?.click()}>
-                  {settings.customBgUrl ? 'تغيير الملف' : 'رفع ملف'}
-                </Button>
-                {settings.customBgUrl && (
-                  <button
-                    onClick={() => settings.setCustomBgUrl('')}
-                    style={{
-                      background: 'rgba(229,115,115,0.15)', border: '1px solid #E57373',
-                      color: '#E57373', padding: '8px 12px', borderRadius: '8px',
-                      cursor: 'pointer', fontSize: '13px',
-                    }}
-                  >
-                    إزالة
-                  </button>
-                )}
-              </div>
-              {settings.customBgUrl && (
-                <div style={{ color: '#81C784', fontSize: '12px', marginTop: '4px' }}>
-                  ✓ موسيقى مرفوعة
-                </div>
-              )}
-            </div>
-            <Button variant="secondary" onClick={settings.resetAll}>إعادة الإعدادات الافتراضية</Button>
-          </div>
-          <Button variant="ghost" onClick={() => setScreen('menu')}>الرجوع</Button>
-        </div>
+        <SettingsPanel onBack={() => setScreen('menu')} />
       )}
 
       {screen === 'victory' && (
