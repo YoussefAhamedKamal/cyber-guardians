@@ -158,8 +158,8 @@ export function SettingsPanel({ onBack }: Props) {
             </div>
             <div style={rowStyle}>
               <FileUploadRow
-                label="خلفية متحركة (GIF/فيديو)"
-                accept="video/*,image/gif"
+                label="خلفية (صورة أو فيديو متحرك)"
+                accept="image/*,video/*"
                 currentUrl={s.bgAnimationUrl}
                 onUpload={s.setBgAnimationUrl}
                 onRemove={() => s.setBgAnimationUrl('')}

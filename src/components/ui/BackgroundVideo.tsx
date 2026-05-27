@@ -14,20 +14,20 @@ export function BackgroundVideo({ blur = 0, overlayOpacity = 0.6 }: Props) {
   const imgRef = useRef<HTMLImageElement>(null)
 
   const useCustomAnim = s.bgAnimationUrl.length > 0
-  const isGif = useCustomAnim && s.bgAnimationUrl.startsWith('data:image/gif')
+  const isImage = useCustomAnim && s.bgAnimationUrl.startsWith('data:image/')
 
   useEffect(() => {
     const el = videoRef.current
-    if (!el || !useCustomAnim || isGif) return
+    if (!el || !useCustomAnim || isImage) return
     el.play().catch(() => {})
-  }, [useCustomAnim, isGif, s.bgAnimationUrl])
+  }, [useCustomAnim, isImage, s.bgAnimationUrl])
 
   const brightness = useCustomAnim ? s.bgAnimationBrightness : s.bgBrightness
 
   return (
     <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
       {useCustomAnim ? (
-        isGif ? (
+        isImage ? (
           <img
             ref={imgRef}
             src={s.bgAnimationUrl}
