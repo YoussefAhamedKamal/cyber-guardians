@@ -5,3 +5,4 @@ dist
 videos_chracters/
 src/**/*.js
 src/**/*.d.ts
+!src/vite-env.d.ts
