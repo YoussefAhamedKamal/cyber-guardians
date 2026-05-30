@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+const base = import.meta.env.BASE_URL
 import { useResponsive } from '@/hooks'
 import { Button, ProgressBar, DialogueBox, BackgroundVideo, SettingsPanel, CelebrationVideo } from '@/components/ui'
 import { GameCanvas, Environment } from '@/components/three'
@@ -22,11 +23,8 @@ export function App() {
   useEffect(() => {
     if (settings.muted || settings.bgmVolume <= 0) return
     let stop: () => void
-    if (settings.customBgUrl) {
-      stop = audio.playFileBg(settings.customBgUrl, settings.bgmVolume)
-    } else {
-      stop = audio.playBgLoop(settings.bgmVolume)
-    }
+    const bgSrc = settings.customBgUrl || `${base}videos/output.wav`
+    stop = audio.playFileBg(bgSrc, settings.bgmVolume)
     return () => stop()
   }, [settings.bgmVolume, settings.muted, settings.customBgUrl])
 
