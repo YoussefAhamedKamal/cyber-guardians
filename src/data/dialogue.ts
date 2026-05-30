@@ -76,12 +76,23 @@ export const levels: LevelData[] = [
     ],
     challengeData: {
       mazeGrid: (() => {
-        const size = 5
+        const size = 7
         const grid: import('@/types').MazeCell[][] = []
         for (let y = 0; y < size; y++) {
           const row: import('@/types').MazeCell[] = []
           for (let x = 0; x < size; x++) {
-            row.push({ x, y, isMalware: (x === 3 && y === 2) || (x === 4 && y === 1), isWall: (x === 1 && y === 1) || (x === 2 && y === 2) || (x === 1 && y === 3), isEndpoint: x === 4 && y === 4 })
+            const isMalware =
+              (x === 4 && y === 1) ||
+              (x === 5 && y === 2) ||
+              (x === 3 && y === 4) ||
+              (x === 1 && y === 5)
+            const isWall =
+              (x === 1 && y === 1) ||
+              (x === 3 && y === 3)
+            const isEndpoint =
+              (x === 2 && y === 6) ||
+              (x === 5 && y === 6)
+            row.push({ x, y, isMalware, isWall, isEndpoint })
           }
           grid.push(row)
         }

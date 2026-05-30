@@ -2,30 +2,30 @@ import { useState, useRef } from 'react'
 import { useSettingsStore } from '@/store'
 import { Button } from './Button'
 import { KeyboardShortcuts } from './KeyboardShortcuts'
-import { FONT_OPTIONS, MAX_VIDEO_SIZE, MAX_ANIMATION_SIZE } from '@/utils/constants'
+import { FONT_OPTIONS, HEADING_FONT_OPTIONS, MONO_FONT_OPTIONS, MAX_VIDEO_SIZE, MAX_ANIMATION_SIZE } from '@/utils/constants'
 
 interface Props {
   onBack: () => void
 }
 
 const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '8px', borderRadius: '8px',
+  width: '100%', padding: '8px', borderRadius: 'var(--custom-border-radius)',
   background: '#1a1a2e', color: '#fff',
-  border: '1px solid rgba(255,255,255,0.2)',
+  border: 'var(--custom-border-width) solid var(--custom-border-color)',
 }
 
 const labelStyle: React.CSSProperties = { color: '#aaa', fontSize: '13px' }
 
 const removeBtn: React.CSSProperties = {
-  background: 'rgba(229,115,115,0.15)', border: '1px solid #E57373',
-  color: '#E57373', padding: '8px 12px', borderRadius: '8px',
+  background: 'rgba(229,115,115,0.15)', border: 'var(--custom-border-width) solid var(--border-color-error)',
+  color: '#E57373', padding: '8px 12px', borderRadius: 'var(--custom-border-radius)',
   cursor: 'pointer', fontSize: '13px',
 }
 
 const rowStyle: React.CSSProperties = {
   background: 'rgba(255,255,255,0.03)',
-  borderRadius: '12px',
-  border: '1px solid rgba(255,255,255,0.06)',
+  borderRadius: 'var(--custom-border-radius)',
+  border: 'var(--custom-border-width) solid var(--border-color-faint)',
   padding: '16px',
   display: 'flex',
   flexDirection: 'column',
@@ -87,7 +87,7 @@ export function SettingsPanel({ onBack }: Props) {
           key={t}
           onClick={() => setTab(t)}
           style={{
-            padding: '8px 18px', borderRadius: '20px', border: 'none',
+            padding: '8px 18px', borderRadius: 'var(--custom-border-radius)', border: 'none',
             background: tab === t ? '#4FC3F7' : 'rgba(255,255,255,0.08)',
             color: tab === t ? '#0a0a1a' : '#aaa',
             fontSize: '14px', fontWeight: 700, cursor: 'pointer',
@@ -206,26 +206,104 @@ export function SettingsPanel({ onBack }: Props) {
       case 'الخطوط':
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {/* ── خط النص الأساسي ── */}
             <div style={rowStyle}>
-              <label style={labelStyle}>نوع الخط</label>
+              <label style={labelStyle}>خط النص الأساسي</label>
               <select value={s.fontFamily}
                 onChange={(e) => s.setFontFamily(e.target.value)} style={inputStyle}>
                 {FONT_OPTIONS.map((f) => (<option key={f} value={f}>{f}</option>))}
               </select>
-            </div>
-            <div style={rowStyle}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <label style={labelStyle}>حجم الخط</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={labelStyle}>الحجم</label>
                 <span style={{ color: '#4FC3F7', fontSize: '14px', fontWeight: 700 }}>{s.fontSize}px</span>
               </div>
               <input type="range" min={12} max={28} step={1} value={s.fontSize}
                 onChange={(e) => s.setFontSize(+e.target.value)} style={{ width: '100%' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={labelStyle}>اللون</label>
+                <input type="color" value={s.fontColor}
+                  onChange={(e) => s.setFontColor(e.target.value)}
+                  style={{ ...inputStyle, padding: '4px', height: '36px', width: '60px' }} />
+              </div>
             </div>
+
+            {/* ── خط العناوين ── */}
             <div style={rowStyle}>
-              <label style={labelStyle}>لون الخط</label>
-              <input type="color" value={s.fontColor}
-                onChange={(e) => s.setFontColor(e.target.value)}
-                style={{ ...inputStyle, padding: '4px', height: '40px' }} />
+              <label style={labelStyle}>خط العناوين</label>
+              <select value={s.headingFont}
+                onChange={(e) => s.setHeadingFont(e.target.value)} style={inputStyle}>
+                {HEADING_FONT_OPTIONS.map((f) => (<option key={f} value={f}>{f}</option>))}
+              </select>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={labelStyle}>الحجم</label>
+                <span style={{ color: '#4FC3F7', fontSize: '14px', fontWeight: 700 }}>{s.headingFontSize}px</span>
+              </div>
+              <input type="range" min={14} max={40} step={1} value={s.headingFontSize}
+                onChange={(e) => s.setHeadingFontSize(+e.target.value)} style={{ width: '100%' }} />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={labelStyle}>اللون</label>
+                <input type="color" value={s.headingColor}
+                  onChange={(e) => s.setHeadingColor(e.target.value)}
+                  style={{ ...inputStyle, padding: '4px', height: '36px', width: '60px' }} />
+              </div>
+            </div>
+
+            {/* ── خط الكود ── */}
+            <div style={rowStyle}>
+              <label style={labelStyle}>خط الكود</label>
+              <select value={s.monoFont}
+                onChange={(e) => s.setMonoFont(e.target.value)} style={inputStyle}>
+                {MONO_FONT_OPTIONS.map((f) => (<option key={f} value={f}>{f}</option>))}
+              </select>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label style={labelStyle}>الحجم</label>
+                <span style={{ color: '#4FC3F7', fontSize: '14px', fontWeight: 700 }}>{s.monoFontSize}px</span>
+              </div>
+              <input type="range" min={10} max={24} step={1} value={s.monoFontSize}
+                onChange={(e) => s.setMonoFontSize(+e.target.value)} style={{ width: '100%' }} />
+            </div>
+
+            {/* ── ألوان إضافية ── */}
+            <div style={rowStyle}>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={labelStyle}>لون التمييز</label>
+                  <input type="color" value={s.accentColor}
+                    onChange={(e) => s.setAccentColor(e.target.value)}
+                    style={{ ...inputStyle, padding: '4px', height: '36px', marginTop: '4px' }} />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={labelStyle}>لون النص الثانوي</label>
+                  <input type="color" value={s.mutedColor}
+                    onChange={(e) => s.setMutedColor(e.target.value)}
+                    style={{ ...inputStyle, padding: '4px', height: '36px', marginTop: '4px' }} />
+                </div>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                <label style={labelStyle}>حجم النص الثانوي</label>
+                <span style={{ color: '#4FC3F7', fontSize: '14px', fontWeight: 700 }}>{s.mutedFontSize}px</span>
+              </div>
+              <input type="range" min={10} max={20} step={1} value={s.mutedFontSize}
+                onChange={(e) => s.setMutedFontSize(+e.target.value)} style={{ width: '100%' }} />
+            </div>
+
+            {/* ── معاينة ── */}
+            <div style={rowStyle}>
+              <label style={labelStyle}>معاينة</label>
+              <div style={{
+                background: 'rgba(255,255,255,0.03)', borderRadius: '8px', padding: '12px',
+                fontFamily: `'${s.fontFamily}', sans-serif`, fontSize: `${s.fontSize}px`, color: s.fontColor,
+              }}>
+                <div style={{ fontFamily: `'${s.headingFont}', sans-serif`, color: s.headingColor, fontSize: `${s.headingFontSize}px`, fontWeight: 700, marginBottom: '8px' }}>
+                  عنوان تجريبي
+                </div>
+                <div>نص أساسي تجريبي — هذا مثال على الخط المختار.</div>
+                <div style={{ color: s.mutedColor, fontSize: `${s.mutedFontSize}px`, marginTop: '4px' }}>نص ثانوي تجريبي.</div>
+                <div style={{ color: s.accentColor, fontWeight: 700, marginTop: '4px' }}>نص تمييز تجريبي.</div>
+                <div style={{ fontFamily: `'${s.monoFont}', monospace`, color: '#ccc', fontSize: `${s.monoFontSize}px`, marginTop: '8px', background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '6px', direction: 'ltr', textAlign: 'left' }}>
+                  const code = "كود تجريبي";
+                </div>
+              </div>
             </div>
           </div>
         )
@@ -233,23 +311,89 @@ export function SettingsPanel({ onBack }: Props) {
       case 'الفيديو':
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ ...rowStyle, borderColor: 'rgba(79,195,247,0.3)', background: 'rgba(79,195,247,0.05)' }}>
+              <label style={{ ...labelStyle, color: '#4FC3F7', fontWeight: 700 }}>الشخصيات</label>
+            </div>
             <div style={rowStyle}>
               <FileUploadRow
-                label="فيديو الشخصية الذكور (بديل boy.mp4)"
+                label="زين — محلل أمني"
                 accept="video/*"
-                currentUrl={s.customBoyVideoUrl}
-                onUpload={s.setCustomBoyVideoUrl}
-                onRemove={() => s.setCustomBoyVideoUrl('')}
+                currentUrl={s.customZaynVideoUrl}
+                onUpload={s.setCustomZaynVideoUrl}
+                onRemove={() => s.setCustomZaynVideoUrl('')}
                 maxSize={MAX_VIDEO_SIZE}
               />
             </div>
             <div style={rowStyle}>
               <FileUploadRow
-                label="فيديو الشخصية الأنثى (بديل girl.mp4)"
+                label="د. نورا — خبيرة تشفير"
                 accept="video/*"
-                currentUrl={s.customGirlVideoUrl}
-                onUpload={s.setCustomGirlVideoUrl}
-                onRemove={() => s.setCustomGirlVideoUrl('')}
+                currentUrl={s.customNoraVideoUrl}
+                onUpload={s.setCustomNoraVideoUrl}
+                onRemove={() => s.setCustomNoraVideoUrl('')}
+                maxSize={MAX_VIDEO_SIZE}
+              />
+            </div>
+            <div style={rowStyle}>
+              <FileUploadRow
+                label="عمر — خبير شبكات"
+                accept="video/*"
+                currentUrl={s.customOmarVideoUrl}
+                onUpload={s.setCustomOmarVideoUrl}
+                onRemove={() => s.setCustomOmarVideoUrl('')}
+                maxSize={MAX_VIDEO_SIZE}
+              />
+            </div>
+            <div style={rowStyle}>
+              <FileUploadRow
+                label="ليلى — خبيرة أمن ويب"
+                accept="video/*"
+                currentUrl={s.customLaylaVideoUrl}
+                onUpload={s.setCustomLaylaVideoUrl}
+                onRemove={() => s.setCustomLaylaVideoUrl('')}
+                maxSize={MAX_VIDEO_SIZE}
+              />
+            </div>
+            <div style={rowStyle}>
+              <FileUploadRow
+                label="طارق — محلل برمجيات خبيثة"
+                accept="video/*"
+                currentUrl={s.customTariqVideoUrl}
+                onUpload={s.setCustomTariqVideoUrl}
+                onRemove={() => s.setCustomTariqVideoUrl('')}
+                maxSize={MAX_VIDEO_SIZE}
+              />
+            </div>
+            <div style={rowStyle}>
+              <FileUploadRow
+                label="النظام — إشعارات وأهداف"
+                accept="video/*"
+                currentUrl={s.customSystemVideoUrl}
+                onUpload={s.setCustomSystemVideoUrl}
+                onRemove={() => s.setCustomSystemVideoUrl('')}
+                maxSize={MAX_VIDEO_SIZE}
+              />
+            </div>
+            <div style={{ ...rowStyle, borderColor: 'rgba(255,183,77,0.3)', background: 'rgba(255,183,77,0.05)' }}>
+              <label style={{ ...labelStyle, color: '#FFB74D', fontWeight: 700 }}>المشاهد</label>
+            </div>
+            <div style={rowStyle}>
+              <FileUploadRow
+                label="فيديو الاحتفال (نهاية اللعبة)"
+                accept="video/*"
+                currentUrl={s.customCelebrationVideoUrl}
+                onUpload={s.setCustomCelebrationVideoUrl}
+                onRemove={() => s.setCustomCelebrationVideoUrl('')}
+                maxSize={MAX_VIDEO_SIZE}
+              />
+            </div>
+            <div style={rowStyle}>
+              <FileUploadRow
+                label="خلفية القائمة الرئيسية"
+                accept="video/*"
+                currentUrl={s.customBoyVideoUrl}
+                onUpload={s.setCustomBoyVideoUrl}
+                onRemove={() => s.setCustomBoyVideoUrl('')}
                 maxSize={MAX_VIDEO_SIZE}
               />
             </div>
@@ -297,7 +441,7 @@ export function SettingsPanel({ onBack }: Props) {
       height: '100%', padding: '20px 16px',
       position: 'relative', zIndex: 1,
     }}>
-      <h2 style={{ fontSize: '26px', margin: '0 0 12px', flexShrink: 0 }}>الإعدادات</h2>
+      <h2 style={{ fontSize: 'var(--heading-font-size)', margin: '0 0 12px', flexShrink: 0, fontFamily: 'var(--heading-font)', color: 'var(--heading-color)' }}>الإعدادات</h2>
       {tabBar}
       <div style={{ flex: 1, overflow: 'auto', width: '100%', maxWidth: '480px' }}>
         {content()}

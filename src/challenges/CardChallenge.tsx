@@ -3,19 +3,38 @@ import type { PhishingEmail } from '@/types'
 import { Button } from '@/components/ui'
 import { audio } from '@/systems/ProceduralAudio'
 
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    const temp = a[i] as T
+    a[i] = a[j] as T
+    a[j] = temp
+  }
+  return a
+}
+
 interface Props {
   emails: PhishingEmail[]
   onComplete: (score: number) => void
 }
 
 export function CardChallenge({ emails, onComplete }: Props) {
+  const [shuffledEmails] = useState(() => shuffle(emails))
   const [index, setIndex] = useState(0)
   const [correct, setCorrect] = useState(0)
   const [wrong, setWrong] = useState<string[]>([])
   const [done, setDone] = useState(false)
 
-  const email = emails[index]
+  const email = shuffledEmails[index]
   if (!email) return null
+
+  const reset = () => {
+    setIndex(0)
+    setCorrect(0)
+    setWrong([])
+    setDone(false)
+  }
 
   const handleChoice = (isPhishing: boolean) => {
     if (done) return
@@ -27,7 +46,7 @@ export function CardChallenge({ emails, onComplete }: Props) {
       audio.playWrong()
     }
     const next = index + 1
-    if (next >= emails.length) {
+    if (next >= shuffledEmails.length) {
       setDone(true)
       return
     }
@@ -35,22 +54,25 @@ export function CardChallenge({ emails, onComplete }: Props) {
   }
 
   if (done) {
-    const score = Math.round((correct / emails.length) * 100)
+    const score = Math.round((correct / shuffledEmails.length) * 100)
     return (
       <div style={{ textAlign: 'center', padding: '32px', direction: 'rtl' }}>
         <div style={{ fontSize: '48px', marginBottom: '16px', color: score >= 80 ? '#81C784' : '#FFB74D' }}>
           {score >= 80 ? '✓' : '?'}
         </div>
-        <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>{score >= 80 ? 'أحسنت!' : 'حاول مرة أخرى'}</h3>
-        <p style={{ color: '#aaa', marginBottom: '8px' }}>صحيح: {correct} من {emails.length}</p>
+        <h3 style={{ fontSize: 'var(--heading-font-size)', marginBottom: '8px', fontFamily: 'var(--heading-font)', color: 'var(--heading-color)' }}>{score >= 80 ? 'أحسنت!' : 'حاول مرة أخرى'}</h3>
+        <p style={{ color: '#aaa', marginBottom: '8px' }}>صحيح: {correct} من {shuffledEmails.length}</p>
         {wrong.length > 0 && (
           <div style={{ color: '#E57373', fontSize: '14px', marginBottom: '16px' }}>
             أخطأت في {wrong.length} إيميل{wrong.length > 1 ? 'ات' : ''}
           </div>
         )}
-        <Button onClick={() => onComplete(score)}>
-          {score >= 80 ? 'متابعة' : 'المتابعة على أي حال'}
-        </Button>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <Button onClick={() => onComplete(score)}>
+            {score >= 80 ? 'متابعة' : 'المتابعة على أي حال'}
+          </Button>
+          <Button variant="secondary" onClick={reset}>إعادة المحاولة</Button>
+        </div>
       </div>
     )
   }

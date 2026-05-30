@@ -14,17 +14,32 @@ export const DEFAULT_SETTINGS = {
   fontSize: 16,
   fontFamily: 'Cairo',
   fontColor: '#ffffff',
+  headingFont: 'Cairo',
+  headingFontSize: 24,
+  headingColor: '#4FC3F7',
+  accentColor: '#4FC3F7',
+  mutedColor: '#888888',
+  mutedFontSize: 13,
+  monoFont: 'Courier New',
+  monoFontSize: 14,
   borderRadius: 12,
   borderColor: 'rgba(255,255,255,0.2)',
   borderWidth: 1,
   bgColor: '#0a0a1a',
   bgBrightness: 1.0,
-  bgAnimationUrl: '',
+  bgAnimationUrl: '/videos/background_1.mp4',
   bgAnimationBrightness: 0.6,
   accessibilityMode: false,
-  customBgUrl: '',
+  customBgUrl: '/videos/output.wav',
   customBoyVideoUrl: '',
   customGirlVideoUrl: '',
+  customZaynVideoUrl: '',
+  customNoraVideoUrl: '',
+  customOmarVideoUrl: '',
+  customLaylaVideoUrl: '',
+  customTariqVideoUrl: '',
+  customSystemVideoUrl: '',
+  customCelebrationVideoUrl: '',
 }
 
 export const QUALITY_PRESETS = {
@@ -34,6 +49,10 @@ export const QUALITY_PRESETS = {
 } as const
 
 export const FONT_OPTIONS = ['Cairo', 'Amiri', 'Noto Naskh Arabic', 'Segoe UI', 'Traditional Arabic'] as const
+
+export const HEADING_FONT_OPTIONS = ['Cairo', 'Amiri', 'Noto Naskh Arabic', 'Traditional Arabic', 'Arial Black', 'Impact'] as const
+
+export const MONO_FONT_OPTIONS = ['Courier New', 'Consolas', 'Fira Code', 'Source Code Pro', 'monospace'] as const
 
 export const SHORTCUTS = [
   { key: 'Enter', desc: 'متابعة الحوار / تأكيد' },

@@ -1,7 +1,8 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import type { ChallengeState, LevelId } from '@/types'
 import { STORAGE_KEY } from '@/utils/constants'
+import { indexedDBStorage } from '@/utils/indexedDBStorage'
 
 interface GameStore {
   currentLevel: LevelId
@@ -58,19 +59,26 @@ export const useGameStore = create<GameStore>()(
     }),
     {
       name: STORAGE_KEY,
+      storage: createJSONStorage(() => indexedDBStorage),
       partialize: (s) => ({
         currentLevel: s.currentLevel,
-        completedLevels: Array.from(s.completedLevels),
+        completedLevels: [...s.completedLevels],
         totalScore: s.totalScore,
       }),
       merge: (persisted, current) => {
-        const p = persisted as Partial<GameStore> | undefined
+        const p = persisted as Record<string, unknown> | undefined
         if (!p) return current
+        const raw = p.completedLevels
+        const levels: LevelId[] = Array.isArray(raw)
+          ? (raw as LevelId[])
+          : typeof raw === 'object' && raw !== null
+            ? Object.keys(raw).map(Number).filter((n) => (raw as Record<string, unknown>)[String(n)] === true) as LevelId[]
+            : []
         return {
           ...current,
-          currentLevel: (p.currentLevel ?? 1) as LevelId,
-          completedLevels: new Set((Array.isArray(p.completedLevels) ? p.completedLevels : []) as LevelId[]),
-          totalScore: p.totalScore ?? 0,
+          currentLevel: (typeof p.currentLevel === 'number' ? p.currentLevel : 1) as LevelId,
+          completedLevels: new Set(levels),
+          totalScore: typeof p.totalScore === 'number' ? p.totalScore : 0,
         }
       },
     }

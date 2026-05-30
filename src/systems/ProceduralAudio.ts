@@ -20,6 +20,8 @@ function playTone(freq: number, duration: number, type: OscillatorType = 'sine',
   osc.stop(c.currentTime + duration)
 }
 
+let bgAudio: HTMLAudioElement | null = null
+
 export const audio = {
   playCorrect() {
     playTone(523.25, 0.1, 'sine', 0.3)
@@ -34,6 +36,9 @@ export const audio = {
 
   playClick() {
     playTone(800, 0.05, 'sine', 0.1)
+    if (bgAudio && bgAudio.paused) {
+      bgAudio.play().catch(() => {})
+    }
   },
 
   playLevelUp() {
@@ -63,11 +68,17 @@ export const audio = {
 
   playFileBg(src: string, volume: number) {
     if (volume <= 0 || !src) return () => {}
+    if (bgAudio) { bgAudio.pause(); bgAudio.remove() }
     const el = document.createElement('audio')
     el.src = src
     el.loop = true
-    el.volume = volume
-    el.play().catch(() => {})
-    return () => { el.pause(); el.remove() }
+    el.preload = 'auto'
+    el.volume = Math.min(volume, 1)
+    bgAudio = el
+    el.play().catch(() => {
+      const resume = () => { el.play().catch(() => {}) ; document.removeEventListener('click', resume) }
+      document.addEventListener('click', resume, { once: true })
+    })
+    return () => { el.pause(); el.remove(); bgAudio = null }
   },
 }

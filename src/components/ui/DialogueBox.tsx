@@ -12,14 +12,19 @@ interface DialogueBoxProps {
 const base = import.meta.env.BASE_URL
 
 function VideoBackground({ speakerId }: { speakerId: string }) {
-  const char = characters[speakerId]
   const settings = useSettingsStore()
-  const customBoy = settings.customBoyVideoUrl
-  const customGirl = settings.customGirlVideoUrl
 
-  const src = char?.gender === 'male'
-    ? (customBoy || `${base}videos/boy.mp4`)
-    : (customGirl || `${base}videos/girl.mp4`)
+  const customMap: Record<string, string> = {
+    zayn: settings.customZaynVideoUrl,
+    nora: settings.customNoraVideoUrl,
+    omar: settings.customOmarVideoUrl,
+    layla: settings.customLaylaVideoUrl,
+    tariq: settings.customTariqVideoUrl,
+    system: settings.customSystemVideoUrl,
+  }
+
+  const custom = customMap[speakerId] || ''
+  const src = custom || `${base}videos/${speakerId}.mp4`
   const ref = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import type { MazeCell } from '@/types'
 import { Button } from '@/components/ui'
 import { audio } from '@/systems/ProceduralAudio'
@@ -18,19 +18,17 @@ export function MazeChallenge({ grid, onComplete }: Props) {
 
   const [player, setPlayer] = useState({ x: 0, y: 0 })
   const [malware, setMalware] = useState(initialMalware)
-  const [secured, setSecured] = useState(0)
   const totalMalware = initialMalware.length
+  const secured = totalMalware - malware.length
   const [done, setDone] = useState(false)
 
-  const isBlocked = (x: number, y: number) => {
-    const cell = grid[y]?.[x]
-    if (!cell) return true
-    if (cell.isWall) return true
-    if (malware.some((m) => m.x === x && m.y === y)) return true
-    return false
+  function reset() {
+    setPlayer({ x: 0, y: 0 })
+    setMalware(initialMalware.map((m) => ({ ...m })))
+    setDone(false)
   }
 
-  const move = useCallback((dx: number, dy: number) => {
+  function move(dx: number, dy: number) {
     if (done) return
     setPlayer((prev) => {
       const nx = prev.x + dx
@@ -53,14 +51,11 @@ export function MazeChallenge({ grid, onComplete }: Props) {
           )
           if (pushTarget.isEndpoint) {
             audio.playLevelUp()
-            setSecured((s) => {
-              const next = s + 1
-              if (next >= totalMalware) {
-                setTimeout(() => setDone(true), 400)
-              }
-              return next
-            })
-            return updated.filter((m) => !(m.x === pushX && m.y === pushY))
+            const remaining = updated.filter((m) => !(m.x === pushX && m.y === pushY))
+            if (remaining.length === 0) {
+              setTimeout(() => setDone(true), 400)
+            }
+            return remaining
           }
           return updated
         })
@@ -70,26 +65,26 @@ export function MazeChallenge({ grid, onComplete }: Props) {
 
       return { x: nx, y: ny }
     })
-  }, [done, malware, grid, totalMalware])
-
-  const isEndpoint = (x: number, y: number) =>
-    grid[y]?.[x]?.isEndpoint ?? false
+  }
 
   if (done) {
     const score = 100
     return (
       <div style={{ textAlign: 'center', padding: '32px' }}>
         <div style={{ fontSize: '48px', marginBottom: '16px' }}>&#x1F6E1;</div>
-        <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>تم تطهير الشبكة!</h3>
+        <h3 style={{ fontSize: 'var(--heading-font-size)', marginBottom: '8px', fontFamily: 'var(--heading-font)', color: 'var(--heading-color)' }}>تم تطهير الشبكة!</h3>
         <p style={{ color: '#aaa', marginBottom: '8px' }}>
           جميع الملفات الخبيثة معزولة: {secured} من {totalMalware}
         </p>
-        <Button onClick={() => onComplete(score)}>متابعة</Button>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <Button onClick={() => onComplete(score)}>متابعة</Button>
+          <Button variant="secondary" onClick={reset}>إعادة المحاولة</Button>
+        </div>
       </div>
     )
   }
 
-  const cellSize = 56
+  const cellSize = size > 6 ? 48 : 56
 
   return (
     <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
@@ -98,6 +93,9 @@ export function MazeChallenge({ grid, onComplete }: Props) {
       </div>
       <div style={{ color: '#E57373', fontSize: '13px' }}>
         معزول: {secured} / {totalMalware}
+      </div>
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <Button variant="ghost" onClick={reset}>إعادة تعيين</Button>
       </div>
       <div
         style={{
@@ -113,7 +111,7 @@ export function MazeChallenge({ grid, onComplete }: Props) {
             const ep = c.isEndpoint
 
             let bg = 'rgba(255,255,255,0.05)'
-            let border = '2px solid transparent'
+            let border = 'var(--custom-border-width) solid transparent'
             let content = ''
 
             if (wall) {
@@ -121,17 +119,17 @@ export function MazeChallenge({ grid, onComplete }: Props) {
               content = '&#x25A3;'
             } else if (isMalwareHere) {
               bg = 'rgba(229,115,115,0.2)'
-              border = '2px solid #E57373'
+              border = 'var(--custom-border-width) solid var(--border-color-error)'
               content = '&#x25CF;'
             } else if (ep) {
               bg = 'rgba(129,199,132,0.15)'
-              border = '2px solid #81C784'
+              border = 'var(--custom-border-width) solid var(--border-color-success)'
               content = '&#x25C9;'
             }
 
             if (isPlayer) {
               bg = 'rgba(79,195,247,0.25)'
-              border = '2px solid #4FC3F7'
+              border = 'var(--custom-border-width) solid var(--accent-color)'
               content = '&#x25D8;'
             }
 
@@ -173,6 +171,6 @@ export function MazeChallenge({ grid, onComplete }: Props) {
 }
 
 const arrowStyle: React.CSSProperties = {
-  width: '56px', height: '56px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.2)',
+  width: '56px', height: '56px', borderRadius: 'var(--custom-border-radius)', border: 'var(--custom-border-width) solid var(--border-color-subtle)',
   background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '24px', cursor: 'pointer',
 }

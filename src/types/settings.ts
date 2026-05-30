@@ -6,6 +6,14 @@ export interface GameSettings {
   fontSize: number
   fontFamily: string
   fontColor: string
+  headingFont: string
+  headingFontSize: number
+  headingColor: string
+  accentColor: string
+  mutedColor: string
+  mutedFontSize: number
+  monoFont: string
+  monoFontSize: number
   borderRadius: number
   borderColor: string
   borderWidth: number
@@ -17,4 +25,11 @@ export interface GameSettings {
   customBgUrl: string
   customBoyVideoUrl: string
   customGirlVideoUrl: string
+  customZaynVideoUrl: string
+  customNoraVideoUrl: string
+  customOmarVideoUrl: string
+  customLaylaVideoUrl: string
+  customTariqVideoUrl: string
+  customSystemVideoUrl: string
+  customCelebrationVideoUrl: string
 }

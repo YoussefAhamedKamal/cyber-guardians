@@ -18,7 +18,7 @@ export function Modal({ children, onClose }: ModalProps) {
       <div
         style={{
           background: '#1a1a2e',
-          padding: '32px', borderRadius: '16px',
+          padding: '32px', borderRadius: 'var(--custom-border-radius)',
           maxWidth: '500px', width: '90%',
         }}
         onClick={(e) => e.stopPropagation()}

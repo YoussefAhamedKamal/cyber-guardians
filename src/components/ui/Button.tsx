@@ -6,7 +6,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const baseStyle: React.CSSProperties = {
   padding: '12px 32px',
-  borderRadius: '12px',
+  borderRadius: 'var(--custom-border-radius)',
   border: 'none',
   fontSize: '18px',
   fontWeight: 700,
@@ -16,9 +16,9 @@ const baseStyle: React.CSSProperties = {
 }
 
 const variants: Record<string, React.CSSProperties> = {
-  primary: { background: '#4FC3F7', color: '#0a0a1a' },
-  secondary: { background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid rgba(255,255,255,0.2)' },
-  ghost: { background: 'transparent', color: '#4FC3F7' },
+  primary: { background: 'var(--accent-color)', color: '#0a0a1a' },
+  secondary: { background: 'rgba(255,255,255,0.1)', color: '#fff', border: 'var(--custom-border-width) solid var(--custom-border-color)' },
+  ghost: { background: 'transparent', color: 'var(--accent-color)' },
 }
 
 export function Button({ variant = 'primary', style, ...props }: ButtonProps) {

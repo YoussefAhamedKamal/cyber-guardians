@@ -28,6 +28,11 @@ export function BuildChallenge({ rules, onComplete }: Props) {
   const satisfied = evaluated.filter((r) => r.satisfied).length
   const allSatisfied = satisfied === rules.length
 
+  const reset = () => {
+    setPassword('')
+    setDone(false)
+  }
+
   const strength = allSatisfied ? 'قوية' : satisfied >= 2 ? 'متوسطة' : 'ضعيفة'
   const strengthColor = allSatisfied ? '#81C784' : satisfied >= 2 ? '#FFB74D' : '#E57373'
 
@@ -35,9 +40,12 @@ export function BuildChallenge({ rules, onComplete }: Props) {
     return (
       <div style={{ textAlign: 'center', padding: '32px', direction: 'rtl' }}>
         <div style={{ fontSize: '48px', marginBottom: '16px', color: '#81C784' }}>🗝</div>
-        <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>تم بناء كلمة المرور!</h3>
+        <h3 style={{ fontSize: 'var(--heading-font-size)', marginBottom: '8px', fontFamily: 'var(--heading-font)', color: 'var(--heading-color)' }}>تم بناء كلمة المرور!</h3>
         <p style={{ color: '#aaa', marginBottom: '16px' }}>القوة: {satisfied}/{rules.length} معايير</p>
-        <Button onClick={() => onComplete(Math.round((satisfied / rules.length) * 100))}>متابعة</Button>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <Button onClick={() => onComplete(Math.round((satisfied / rules.length) * 100))}>متابعة</Button>
+          <Button variant="secondary" onClick={reset}>إعادة المحاولة</Button>
+        </div>
       </div>
     )
   }
@@ -54,7 +62,7 @@ export function BuildChallenge({ rules, onComplete }: Props) {
         onChange={(e) => setPassword(e.target.value)}
         placeholder="اكتب كلمة مرور قوية..."
         style={{
-          width: '100%', padding: '14px', borderRadius: '10px', border: '2px solid rgba(255,255,255,0.15)',
+          width: '100%', padding: '14px', borderRadius: 'var(--custom-border-radius)', border: 'var(--custom-border-width) solid var(--border-color-subtle)',
           background: 'rgba(255,255,255,0.05)', color: '#fff', fontSize: '18px', textAlign: 'center',
           direction: 'ltr', marginBottom: '20px',
         }}
@@ -63,8 +71,8 @@ export function BuildChallenge({ rules, onComplete }: Props) {
         {evaluated.map((r) => (
           <div key={r.type} style={{
             display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px',
-            borderRadius: '8px', background: r.satisfied ? 'rgba(129,199,132,0.1)' : 'rgba(255,255,255,0.03)',
-            border: `1px solid ${r.satisfied ? '#81C784' : 'rgba(255,255,255,0.08)'}`,
+            borderRadius: 'var(--custom-border-radius)', background: r.satisfied ? 'rgba(129,199,132,0.1)' : 'rgba(255,255,255,0.03)',
+            border: `var(--custom-border-width) solid ${r.satisfied ? 'var(--border-color-success)' : 'var(--border-color-faint)'}`,
           }}>
             <span style={{ fontSize: '18px', color: r.satisfied ? '#81C784' : '#E57373' }}>
               {r.satisfied ? '✓' : '✗'}

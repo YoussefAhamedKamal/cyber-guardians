@@ -16,7 +16,7 @@ export function KeyboardShortcuts({ onClose }: Props) {
     >
       <div
         style={{
-          background: '#1a1a2e', padding: '32px', borderRadius: '16px',
+          background: '#1a1a2e', padding: '32px', borderRadius: 'var(--custom-border-radius)',
           maxWidth: '450px', width: '90%',
         }}
         onClick={(e) => e.stopPropagation()}
@@ -27,8 +27,8 @@ export function KeyboardShortcuts({ onClose }: Props) {
             <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <kbd style={{
                 background: 'rgba(255,255,255,0.1)', padding: '4px 12px',
-                borderRadius: '6px', fontSize: '14px', minWidth: '80px',
-                textAlign: 'center', border: '1px solid rgba(255,255,255,0.2)',
+                borderRadius: 'var(--custom-border-radius)', fontSize: '14px', minWidth: '80px',
+                textAlign: 'center', border: 'var(--custom-border-width) solid var(--border-color-subtle)',
               }}>
                 {s.key}
               </kbd>
@@ -49,7 +49,7 @@ export function KeyboardShortcuts({ onClose }: Props) {
           onClick={onClose}
           style={{
             marginTop: '20px', width: '100%', padding: '10px',
-            borderRadius: '8px', border: 'none', background: '#4FC3F7',
+            borderRadius: 'var(--custom-border-radius)', border: 'none', background: 'var(--accent-color)',
             color: '#0a0a1a', fontSize: '16px', cursor: 'pointer', fontWeight: 700,
           }}
         >

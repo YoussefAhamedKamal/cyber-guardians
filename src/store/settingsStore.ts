@@ -1,7 +1,8 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 import type { GameSettings } from '@/types'
 import { SETTINGS_KEY, DEFAULT_SETTINGS } from '@/utils/constants'
+import { indexedDBStorage } from '@/utils/indexedDBStorage'
 
 interface SettingsStore extends GameSettings {
   setBgmVolume: (v: number) => void
@@ -11,6 +12,14 @@ interface SettingsStore extends GameSettings {
   setFontSize: (s: number) => void
   setFontFamily: (f: string) => void
   setFontColor: (c: string) => void
+  setHeadingFont: (f: string) => void
+  setHeadingFontSize: (s: number) => void
+  setHeadingColor: (c: string) => void
+  setAccentColor: (c: string) => void
+  setMutedColor: (c: string) => void
+  setMutedFontSize: (s: number) => void
+  setMonoFont: (f: string) => void
+  setMonoFontSize: (s: number) => void
   setBorderRadius: (r: number) => void
   setBorderColor: (c: string) => void
   setBorderWidth: (w: number) => void
@@ -22,6 +31,13 @@ interface SettingsStore extends GameSettings {
   setCustomBgUrl: (url: string) => void
   setCustomBoyVideoUrl: (url: string) => void
   setCustomGirlVideoUrl: (url: string) => void
+  setCustomZaynVideoUrl: (url: string) => void
+  setCustomNoraVideoUrl: (url: string) => void
+  setCustomOmarVideoUrl: (url: string) => void
+  setCustomLaylaVideoUrl: (url: string) => void
+  setCustomTariqVideoUrl: (url: string) => void
+  setCustomSystemVideoUrl: (url: string) => void
+  setCustomCelebrationVideoUrl: (url: string) => void
   resetAll: () => void
 }
 
@@ -37,6 +53,14 @@ export const useSettingsStore = create<SettingsStore>()(
       setFontSize: (s) => set({ fontSize: s }),
       setFontFamily: (f) => set({ fontFamily: f }),
       setFontColor: (c) => set({ fontColor: c }),
+      setHeadingFont: (f) => set({ headingFont: f }),
+      setHeadingFontSize: (s) => set({ headingFontSize: s }),
+      setHeadingColor: (c) => set({ headingColor: c }),
+      setAccentColor: (c) => set({ accentColor: c }),
+      setMutedColor: (c) => set({ mutedColor: c }),
+      setMutedFontSize: (s) => set({ mutedFontSize: s }),
+      setMonoFont: (f) => set({ monoFont: f }),
+      setMonoFontSize: (s) => set({ monoFontSize: s }),
       setBorderRadius: (r) => set({ borderRadius: r }),
       setBorderColor: (c) => set({ borderColor: c }),
       setBorderWidth: (w) => set({ borderWidth: w }),
@@ -49,8 +73,15 @@ export const useSettingsStore = create<SettingsStore>()(
       setCustomBgUrl: (url) => set({ customBgUrl: url }),
       setCustomBoyVideoUrl: (url) => set({ customBoyVideoUrl: url }),
       setCustomGirlVideoUrl: (url) => set({ customGirlVideoUrl: url }),
+      setCustomZaynVideoUrl: (url) => set({ customZaynVideoUrl: url }),
+      setCustomNoraVideoUrl: (url) => set({ customNoraVideoUrl: url }),
+      setCustomOmarVideoUrl: (url) => set({ customOmarVideoUrl: url }),
+      setCustomLaylaVideoUrl: (url) => set({ customLaylaVideoUrl: url }),
+      setCustomTariqVideoUrl: (url) => set({ customTariqVideoUrl: url }),
+      setCustomSystemVideoUrl: (url) => set({ customSystemVideoUrl: url }),
+      setCustomCelebrationVideoUrl: (url) => set({ customCelebrationVideoUrl: url }),
       resetAll: () => set({ ...DEFAULT_SETTINGS }),
     }),
-    { name: SETTINGS_KEY }
+    { name: SETTINGS_KEY, storage: createJSONStorage(() => indexedDBStorage) }
   )
 )

@@ -1,13 +1,13 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useResponsive } from '@/hooks'
-import { Button, ProgressBar, DialogueBox, BackgroundVideo, SettingsPanel } from '@/components/ui'
+import { Button, ProgressBar, DialogueBox, BackgroundVideo, SettingsPanel, CelebrationVideo } from '@/components/ui'
 import { GameCanvas, Environment } from '@/components/three'
 import { useGameStore, useSettingsStore } from '@/store'
 import { levels } from '@/data'
 import { ChallengeRenderer } from '@/challenges'
 import { audio } from '@/systems/ProceduralAudio'
 
-type Screen = 'menu' | 'levelSelect' | 'dialogue' | 'gameplay' | 'settings' | 'victory'
+type Screen = 'menu' | 'levelSelect' | 'dialogue' | 'gameplay' | 'settings' | 'celebration' | 'victory'
 
 export function App() {
   const [screen, setScreen] = useState<Screen>('menu')
@@ -66,7 +66,7 @@ export function App() {
       setScreen('gameplay')
     } else {
       if (game.currentLevel === 7 && game.completedLevels.has(7)) {
-        setScreen('victory')
+        setScreen('celebration')
       } else {
         setScreen('levelSelect')
       }
@@ -89,11 +89,25 @@ export function App() {
     background: settings.bgColor,
     color: settings.fontColor,
     fontFamily: `'${settings.fontFamily}', 'Segoe UI', sans-serif`,
+    fontSize: `${settings.fontSize}px`,
     direction: 'rtl',
     '--custom-brightness': settings.bgBrightness,
     '--custom-border-radius': `${settings.borderRadius}px`,
     '--custom-border-color': settings.borderColor,
     '--custom-border-width': `${settings.borderWidth}px`,
+    '--heading-font': `'${settings.headingFont}', sans-serif`,
+    '--heading-font-size': `${settings.headingFontSize}px`,
+    '--heading-color': settings.headingColor,
+    '--accent-color': settings.accentColor,
+    '--muted-color': settings.mutedColor,
+    '--mono-font': `'${settings.monoFont}', monospace`,
+    '--mono-font-size': `${settings.monoFontSize}px`,
+    '--border-color-subtle': 'rgba(255,255,255,0.2)',
+    '--border-color-muted': 'rgba(255,255,255,0.1)',
+    '--border-color-faint': 'rgba(255,255,255,0.06)',
+    '--border-color-success': '#81C784',
+    '--border-color-error': '#E57373',
+    '--border-color-warning': '#FFB74D',
   } as React.CSSProperties & Record<string, string | number>
 
   const titleGradient: React.CSSProperties = {
@@ -126,7 +140,7 @@ export function App() {
           justifyContent: 'center', height: '100%', gap: '20px', padding: '32px',
           position: 'relative', zIndex: 1,
         }}>
-          <h2 style={{ fontSize: '32px', margin: 0 }}>اختر المستوى</h2>
+          <h2 style={{ fontSize: 'var(--heading-font-size)', margin: 0, fontFamily: 'var(--heading-font)', color: 'var(--heading-color)' }}>اختر المستوى</h2>
           <div style={{ width: '100%', maxWidth: '600px' }}>
             <ProgressBar value={game.getProgress()} label="التقدم العام" />
           </div>
@@ -137,23 +151,25 @@ export function App() {
             {levels.map((l) => {
               const unlocked = l.id === 1 || game.completedLevels.has((l.id - 1) as 1 | 2 | 3 | 4 | 5 | 6)
               const done = game.completedLevels.has(l.id)
+              const canPlay = unlocked || done
               return (
                 <button
                   key={l.id}
-                  disabled={!unlocked}
-                  onClick={() => unlocked && handleLevelSelect(l.id)}
+                  disabled={!canPlay}
+                  onClick={() => canPlay && handleLevelSelect(l.id)}
                   style={{
-                    padding: '20px', borderRadius: '12px', border: '1px solid',
-                    borderColor: done ? '#4FC3F7' : unlocked ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)',
+                    padding: '20px', borderRadius: 'var(--custom-border-radius)', border: 'var(--custom-border-width) solid',
+                    borderColor: done ? 'var(--accent-color)' : unlocked ? 'var(--border-color-subtle)' : 'var(--border-color-faint)',
                     background: done ? 'rgba(79,195,247,0.1)' : unlocked ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.02)',
-                    color: unlocked ? '#fff' : '#444',
-                    cursor: unlocked ? 'pointer' : 'not-allowed',
+                    color: canPlay ? '#fff' : '#444',
+                    cursor: canPlay ? 'pointer' : 'not-allowed',
                     fontSize: '14px', textAlign: 'center',
                   }}
                 >
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>{done ? '✅' : unlocked ? `0${l.id}` : '🔒'}</div>
+                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>{done ? <span style={{color:'#81C784'}}>&#x2713;</span> : unlocked ? `0${l.id}` : <span style={{color:'#666'}}>&#x1F512;</span>}</div>
                   <div style={{ fontWeight: 700 }}>{l.title}</div>
                   <div style={{ fontSize: '11px', color: '#888' }}>{l.subtitle}</div>
+                  {done && <div style={{ fontSize: '10px', color: '#4FC3F7', marginTop: '4px' }}>اضغط لإعادة</div>}
                 </button>
               )
             })}
@@ -183,7 +199,7 @@ export function App() {
             textAlign: 'center', padding: '12px',
             background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.05)',
           }}>
-            <h2 style={{ fontSize: '20px', margin: 0, ...titleGradient }}>{level.title}</h2>
+            <h2 style={{ fontSize: 'var(--heading-font-size)', margin: 0, ...titleGradient, fontFamily: 'var(--heading-font)' }}>{level.title}</h2>
             <div style={{ color: '#888', fontSize: '13px' }}>{level.subtitle}</div>
           </div>
           <div style={{ flex: 1, overflow: 'auto' }}>
@@ -196,6 +212,10 @@ export function App() {
         <SettingsPanel onBack={() => setScreen('menu')} />
       )}
 
+      {screen === 'celebration' && (
+        <CelebrationVideo onEnd={() => setScreen('victory')} />
+      )}
+
       {screen === 'victory' && (
         <div style={{
           display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -203,7 +223,7 @@ export function App() {
           position: 'relative', zIndex: 1,
         }}>
           <div style={{ fontSize: '64px' }}>🏆</div>
-          <h1 style={{ fontSize: '36px', margin: 0 }}>تهانينا!</h1>
+          <h1 style={{ fontSize: 'var(--heading-font-size)', margin: 0, fontFamily: 'var(--heading-font)', color: 'var(--heading-color)' }}>تهانينا!</h1>
           <p style={{ color: '#aaa', fontSize: '18px', maxWidth: '400px', textAlign: 'center' }}>
             لقد أتممت جميع المستويات. أنت الآن حارس أمن سيبراني حقيقي!
           </p>

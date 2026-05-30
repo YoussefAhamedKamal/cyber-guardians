@@ -14,6 +14,11 @@ export function DragDropChallenge({ ports, onComplete }: Props) {
   )
   const [done, setDone] = useState(false)
 
+  const reset = () => {
+    setPortList(ports.map((p) => ({ ...p })))
+    setDone(false)
+  }
+
   const togglePort = (id: string) => {
     if (done) return
     audio.playClick()
@@ -41,10 +46,13 @@ export function DragDropChallenge({ ports, onComplete }: Props) {
     return (
       <div style={{ textAlign: 'center', padding: '32px', direction: 'rtl' }}>
         <div style={{ fontSize: '48px', marginBottom: '16px', color: '#4FC3F7' }}>◈</div>
-        <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>تم إعداد الجدار الناري!</h3>
+        <h3 style={{ fontSize: 'var(--heading-font-size)', marginBottom: '8px', fontFamily: 'var(--heading-font)', color: 'var(--heading-color)' }}>تم إعداد الجدار الناري!</h3>
         <p style={{ color: '#aaa', marginBottom: '4px' }}>منافذ أساسية مفتوحة: {openCritical}</p>
         <p style={{ color: '#aaa', marginBottom: '16px' }}>منافذ غير ضرورية مغلقة: {closedNonCritical}</p>
-        <Button onClick={() => onComplete(score)}>متابعة</Button>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <Button onClick={() => onComplete(score)}>متابعة</Button>
+          <Button variant="secondary" onClick={reset}>إعادة المحاولة</Button>
+        </div>
       </div>
     )
   }
@@ -61,8 +69,8 @@ export function DragDropChallenge({ ports, onComplete }: Props) {
             onClick={() => togglePort(p.id)}
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '14px 16px', borderRadius: '10px', border: '1px solid',
-              borderColor: p.isCritical ? '#4FC3F7' : 'rgba(255,255,255,0.1)',
+              padding: '14px 16px', borderRadius: 'var(--custom-border-radius)', border: 'var(--custom-border-width) solid',
+              borderColor: p.isCritical ? 'var(--accent-color)' : 'var(--border-color-muted)',
               background: p.status === 'open'
                 ? `rgba(79,195,247,${p.isCritical ? 0.15 : 0.05})`
                 : 'rgba(229,115,115,0.1)',
@@ -79,7 +87,7 @@ export function DragDropChallenge({ ports, onComplete }: Props) {
               </div>
             </div>
             <div style={{
-              padding: '4px 12px', borderRadius: '6px', fontSize: '12px', fontWeight: 700,
+              padding: '4px 12px', borderRadius: 'var(--custom-border-radius)', fontSize: '12px', fontWeight: 700,
               background: p.status === 'open' ? 'rgba(79,195,247,0.2)' : 'rgba(229,115,115,0.2)',
               color: p.status === 'open' ? '#4FC3F7' : '#E57373',
             }}>

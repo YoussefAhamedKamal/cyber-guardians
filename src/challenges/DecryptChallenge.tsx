@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import type { CipherChallenge } from '@/types'
 import { Button } from '@/components/ui'
 import { audio } from '@/systems/ProceduralAudio'
+import { useSettingsStore } from '@/store'
 
 interface Props {
   cipher: CipherChallenge
@@ -24,12 +25,19 @@ function caesarShift(text: string, shift: number): string {
 }
 
 export function DecryptChallenge({ cipher, onComplete }: Props) {
+  const monoFont = useSettingsStore((s) => s.monoFont)
   const [shift, setShift] = useState(1)
   const [correct, setCorrect] = useState(false)
   const [showHint, setShowHint] = useState(false)
 
   const decrypted = useMemo(() => caesarShift(cipher.encrypted, shift), [cipher.encrypted, shift])
   const isCorrect = decrypted.trim().toUpperCase() === cipher.solution.trim().toUpperCase()
+
+  const reset = () => {
+    setShift(1)
+    setCorrect(false)
+    setShowHint(false)
+  }
 
   const handleShift = (delta: number) => {
     audio.playClick()
@@ -54,10 +62,13 @@ export function DecryptChallenge({ cipher, onComplete }: Props) {
     return (
       <div style={{ textAlign: 'center', padding: '32px', direction: 'rtl' }}>
         <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔓</div>
-        <h3 style={{ fontSize: '24px', marginBottom: '8px' }}>تم فك التشفير!</h3>
+        <h3 style={{ fontSize: 'var(--heading-font-size)', marginBottom: '8px', fontFamily: 'var(--heading-font)', color: 'var(--heading-color)' }}>تم فك التشفير!</h3>
         <p style={{ color: '#81C784', marginBottom: '4px' }}>الرسالة: {decrypted}</p>
         <p style={{ fontSize: '13px', color: '#888', marginBottom: '16px' }}>الإزاحة الصحيحة: {cipher.shift}</p>
-        <Button onClick={() => onComplete(100)}>متابعة</Button>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <Button onClick={() => onComplete(100)}>متابعة</Button>
+          <Button variant="secondary" onClick={reset}>إعادة المحاولة</Button>
+        </div>
       </div>
     )
   }
@@ -91,7 +102,7 @@ export function DecryptChallenge({ cipher, onComplete }: Props) {
         </div>
         <div style={{
           fontSize: '28px', fontWeight: 700, letterSpacing: '3px',
-          fontFamily: 'monospace', color: '#E57373',
+          fontFamily: `${monoFont}, monospace`, color: '#E57373',
         }}>
           {cipher.encrypted}
         </div>
@@ -118,7 +129,7 @@ export function DecryptChallenge({ cipher, onComplete }: Props) {
           </button>
           <div style={{
             width: '72px', height: '72px', borderRadius: '16px',
-            background: 'rgba(79,195,247,0.15)', border: '2px solid #4FC3F7',
+            background: 'rgba(79,195,247,0.15)',             border: 'var(--custom-border-width) solid var(--accent-color)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '32px', fontWeight: 700, color: '#4FC3F7',
           }}>
@@ -141,11 +152,11 @@ export function DecryptChallenge({ cipher, onComplete }: Props) {
           <div style={{ color: '#666', marginBottom: '4px', fontSize: '12px' }}>
             كل حرف من الأعلى يُستبدل بالحرف اللي تحته:
           </div>
-          <div style={{ fontFamily: 'monospace', letterSpacing: '2px', color: '#E57373', fontSize: '13px' }}>
+          <div style={{ fontFamily: `${monoFont}, monospace`, letterSpacing: '2px', color: '#E57373', fontSize: '13px' }}>
             {LETTERS}
           </div>
           <div style={{
-            fontFamily: 'monospace', letterSpacing: '2px', color: '#4FC3F7', fontSize: '13px',
+            fontFamily: `${monoFont}, monospace`, letterSpacing: '2px', color: '#4FC3F7', fontSize: '13px',
             marginTop: '2px',
           }}>
             {caesarShift(LETTERS, shift)}
@@ -157,13 +168,13 @@ export function DecryptChallenge({ cipher, onComplete }: Props) {
       <div style={{
         borderRadius: '12px', padding: '16px', marginBottom: '20px', textAlign: 'center',
         background: isCorrect ? 'rgba(129,199,132,0.15)' : 'rgba(255,255,255,0.03)',
-        border: isCorrect ? '1px solid #81C784' : 'none',
+        border: isCorrect ? 'var(--custom-border-width) solid var(--border-color-success)' : 'none',
       }}>
         <div style={{ color: '#888', fontSize: '12px', marginBottom: '4px' }}>
           📝 النص بعد فك التشفير (Shift {shift})
         </div>
         <div style={{
-          fontSize: '24px', fontFamily: 'monospace', letterSpacing: '2px',
+          fontSize: '24px', fontFamily: `${monoFont}, monospace`, letterSpacing: '2px',
           color: isCorrect ? '#81C784' : '#fff', minHeight: '30px',
         }}>
           {decrypted}
