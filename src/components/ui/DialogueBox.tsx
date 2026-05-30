@@ -13,6 +13,7 @@ const base = import.meta.env.BASE_URL
 
 function VideoBackground({ speakerId }: { speakerId: string }) {
   const settings = useSettingsStore()
+  const char = characters[speakerId]
 
   const customMap: Record<string, string> = {
     zayn: settings.customZaynVideoUrl,
@@ -38,13 +39,18 @@ function VideoBackground({ speakerId }: { speakerId: string }) {
   }, [src])
 
   return (
-    <video
-      ref={ref} muted loop playsInline
-      style={{
-        position: 'absolute', inset: 0, width: '100%', height: '100%',
-        objectFit: 'cover',
-      }}
-    />
+    <div style={{
+      position: 'absolute', inset: 0, width: '100%', height: '100%',
+      background: char?.color ?? '#1a1a2e',
+    }}>
+      <video
+        ref={ref} muted loop playsInline preload="auto"
+        style={{
+          position: 'absolute', inset: 0, width: '100%', height: '100%',
+          objectFit: 'cover',
+        }}
+      />
+    </div>
   )
 }
 
