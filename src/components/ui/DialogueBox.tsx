@@ -54,9 +54,23 @@ function VideoBackground({ speakerId }: { speakerId: string }) {
   )
 }
 
+const preloaded = new Set<string>()
+
 export function DialogueBox({ lines, onComplete }: DialogueBoxProps) {
   const [index, setIndex] = useState(0)
   const [charIndex, setCharIndex] = useState(0)
+
+  useEffect(() => {
+    for (const id of Object.keys(characters)) {
+      if (preloaded.has(id)) continue
+      preloaded.add(id)
+      const link = document.createElement('link')
+      link.rel = 'preload'
+      link.as = 'video'
+      link.href = `${base}videos/${id}.mp4`
+      document.head.appendChild(link)
+    }
+  }, [])
 
   const current = lines[index]
   const char = current ? characters[current.speakerId] : null
