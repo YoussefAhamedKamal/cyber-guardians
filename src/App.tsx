@@ -241,6 +241,14 @@ export function App() {
         </div>
       )}
 
+      {/* Version */}
+      <div style={{
+        position: 'fixed', bottom: '16px', left: '16px', zIndex: 9999,
+        color: 'rgba(255,255,255,0.15)', fontSize: '11px', fontFamily: 'monospace', direction: 'ltr',
+      }}>
+        v1.1.0
+      </div>
+
       {/* BGM toggle button */}
       <button
         onClick={() => settings.toggleBgmMute()}
