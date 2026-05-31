@@ -354,19 +354,25 @@ src/
 
 ## [ORPHANS & PENDING]
 
+### مكتمل
 - [x] **إعادة المحاولة في كل التحديات** — تم
 - [x] **خلط الأسئلة عشوائياً** — تم (المستويات 1, 6, 7)
-- [x] **فيديو احتفال نهاية اللعبة** — تم
-- [x] **فيديو مستقل لكل شخصية** — تم (6 شخصيات + احتفال)
+- [x] **فيديو احتفال نهاية اللعبة** — تم (celebration.mp4 + CelebrationVideo)
+- [x] **فيديو مستقل لكل شخصية** — تم (6 شخصيات: zayn, nora, omar, layla, tariq, system)
 - [x] **إعدادات خطوط شاملة** — تم (12 إعداد + معاينة حية)
 - [x] **توحيد الحدود** — تم (~55 hardcoded → CSS variables)
 - [x] **إصلاح Set serialization** — تم
 - [x] **إصلاح autoplay الصوت** — تم
+- [x] **توليد فيديوهات الشخصيات** — تم (zayn.mp4, nora.mp4, omar.mp4, layla.mp4, tariq.mp4, system.mp4, celebration.mp4)
+
+### معلق / غير مربوط
+- [ ] **CharacterModel (3D)** — مكوّن `src/components/three/CharacterModel.tsx` مصدّر لكن غير مستخدم في أي مكان. الـ 3D scene يعرض فقط `Environment`.
+- [ ] **AudioSystem** — `src/systems/AudioSystem.ts` مصدّر لكن غير مستورد في أي كود إنتاجي. الـ app يستخدم `ProceduralAudio` بدلاً منه.
+- [ ] **LoggingSystem** — `src/systems/LoggingSystem.ts` يستخدم فقط في `__tests__/`، ليس في الإنتاج.
+- [ ] **تسجيل الموسيقى من MiniMax Music** — الأوامر جاهزة في PROMPTS.md، `output.wav` حالياً placeholder
 - [ ] **نموذج GLTF مخصص لكل شخصية** — حالياً نموذج واحد (RobotExpressive)
-- [ ] **تسجيل الموسيقى من MiniMax Music** — الأوامر جاهزة في PROMPTS.md
-- [ ] **توليد فيديوهات الشخصيات** — صور FLUX جاهزة + أوامر Anything AI
 - [ ] **تلميحات داخل التحديات** — للمستخدمين الجدد
 - [ ] **ترجمة إنجليزية** — MVP عربي بالكامل
 - [ ] **صفحة Credits** — بسيطة يمكن إضافتها
-- [ ] **تقسيم الـ chunk** — ~1.2MB حالياً
-- [ ] **مشاهد البداية والنصر** — أوامر الفيديو جاهزة في PROMPTS.md
+- [ ] **مشهد البداية (Intro)** — أوامر الفيديو جاهزة في PROMPTS.md
+- [ ] **تقسيم الـ chunk** — ~1.2MB حالياً (Three.js dominates)
