@@ -105,7 +105,7 @@ export function SettingsPanel({ onBack }: Props) {
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div style={rowStyle}>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <label style={labelStyle}>الموسيقى الخلفية</label>
                 <span style={{ color: '#4FC3F7', fontSize: '14px', fontWeight: 700 }}>
                   {Math.round(s.bgmVolume * 100)}%
@@ -113,6 +113,20 @@ export function SettingsPanel({ onBack }: Props) {
               </div>
               <input type="range" min={0} max={2} step={0.05} value={s.bgmVolume}
                 onChange={(e) => s.setBgmVolume(+e.target.value)} style={{ width: '100%' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                <button
+                  onClick={() => s.toggleBgmMute()}
+                  style={{
+                    padding: '6px 14px', borderRadius: 'var(--custom-border-radius)', border: 'var(--custom-border-width) solid var(--custom-border-color)',
+                    background: (s.bgmMuted || s.muted) ? 'rgba(229,115,115,0.2)' : 'rgba(79,195,247,0.15)',
+                    color: (s.bgmMuted || s.muted) ? '#E57373' : '#4FC3F7',
+                    cursor: 'pointer', fontSize: '13px', fontWeight: 700,
+                  }}
+                >
+                  {(s.bgmMuted || s.muted) ? '\u{1F507} كتم' : '\u{1F50A} قيد التشغيل'}
+                </button>
+                <span style={{ color: '#888', fontSize: '11px' }}>(اختصار: B)</span>
+              </div>
             </div>
             <div style={rowStyle}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>

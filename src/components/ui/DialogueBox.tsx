@@ -3,13 +3,12 @@ import type { DialogueLine } from '@/types'
 import { characters } from '@/data'
 import { audio } from '@/systems/ProceduralAudio'
 import { useSettingsStore } from '@/store'
+import { BASE_URL } from '@/utils/constants'
 
 interface DialogueBoxProps {
   lines: DialogueLine[]
   onComplete: () => void
 }
-
-const base = import.meta.env.BASE_URL
 
 function VideoBackground({ speakerId }: { speakerId: string }) {
   const settings = useSettingsStore()
@@ -25,7 +24,7 @@ function VideoBackground({ speakerId }: { speakerId: string }) {
   }
 
   const custom = customMap[speakerId] || ''
-  const src = custom || `${base}videos/${speakerId}.mp4`
+  const src = custom || `${BASE_URL}videos/${speakerId}.mp4`
   const ref = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
@@ -67,7 +66,7 @@ export function DialogueBox({ lines, onComplete }: DialogueBoxProps) {
       const link = document.createElement('link')
       link.rel = 'preload'
       link.as = 'video'
-      link.href = `${base}videos/${id}.mp4`
+      link.href = `${BASE_URL}videos/${id}.mp4`
       document.head.appendChild(link)
     }
   }, [])

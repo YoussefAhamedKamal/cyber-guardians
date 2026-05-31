@@ -2,6 +2,7 @@ export interface GameSettings {
   bgmVolume: number
   sfxVolume: number
   muted: boolean
+  bgmMuted: boolean
   qualityPreset: 'low' | 'medium' | 'high'
   fontSize: number
   fontFamily: string

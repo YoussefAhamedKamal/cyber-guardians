@@ -3,6 +3,7 @@ import { useFrame } from '@react-three/fiber'
 import { Float } from '@react-three/drei'
 import * as THREE from 'three'
 import { characters } from '@/data'
+import { BASE_URL } from '@/utils/constants'
 
 interface Props {
   characterId: string
@@ -22,7 +23,7 @@ function VideoCharacter({ src, color, talking }: { src: string; color: string; t
     vid.muted = true
     vid.playsInline = true
     vid.setAttribute('crossorigin', 'anonymous')
-    vid.play().catch(() => {})
+    vid.play().catch(() => console.warn('CharacterModel video play blocked'))
 
     const tex = new THREE.VideoTexture(vid)
     tex.minFilter = THREE.LinearFilter
@@ -71,13 +72,11 @@ function VideoCharacter({ src, color, talking }: { src: string; color: string; t
   )
 }
 
-const base = import.meta.env.BASE_URL
-
 export function CharacterModel({ characterId, position = [0, 0, 0], talking = false }: Props) {
   const char = characters[characterId]
   const color = char?.color ?? '#4FC3F7'
   const gender = char?.gender ?? 'male'
-  const videoSrc = gender === 'male' ? `${base}videos/boy.mp4` : `${base}videos/girl.mp4`
+  const videoSrc = gender === 'male' ? `${BASE_URL}videos/boy.mp4` : `${BASE_URL}videos/girl.mp4`
 
   return (
     <Float speed={1.2} floatIntensity={0.25} rotationIntensity={0.15}>

@@ -8,6 +8,8 @@ interface SettingsStore extends GameSettings {
   setBgmVolume: (v: number) => void
   setSfxVolume: (v: number) => void
   toggleMute: () => void
+  toggleBgmMute: () => void
+  setBgmMuted: (v: boolean) => void
   setQuality: (q: GameSettings['qualityPreset']) => void
   setFontSize: (s: number) => void
   setFontFamily: (f: string) => void
@@ -49,6 +51,8 @@ export const useSettingsStore = create<SettingsStore>()(
       setBgmVolume: (v) => set({ bgmVolume: v }),
       setSfxVolume: (v) => set({ sfxVolume: v }),
       toggleMute: () => set((s) => ({ muted: !s.muted })),
+      toggleBgmMute: () => set((s) => ({ bgmMuted: !s.bgmMuted })),
+      setBgmMuted: (v) => set({ bgmMuted: v }),
       setQuality: (q) => set({ qualityPreset: q }),
       setFontSize: (s) => set({ fontSize: s }),
       setFontFamily: (f) => set({ fontFamily: f }),
