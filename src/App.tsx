@@ -246,7 +246,7 @@ export function App() {
         onClick={() => settings.toggleBgmMute()}
         title={settings.bgmMuted || settings.muted ? 'تشغيل الموسيقى الخلفية' : 'كتم الموسيقى الخلفية'}
         style={{
-          position: 'fixed', bottom: '16px', left: '16px', zIndex: 9999,
+          position: 'fixed', bottom: '16px', right: '16px', zIndex: 9999,
           width: '44px', height: '44px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.2)',
           background: (settings.bgmMuted || settings.muted) ? 'rgba(255,82,82,0.2)' : 'rgba(79,195,247,0.2)',
           color: '#fff', fontSize: '20px', cursor: 'pointer',
