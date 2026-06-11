@@ -1,8 +1,7 @@
 import { useRef, useEffect, useState } from 'react'
 import { useSettingsStore } from '@/store'
 import { Button } from './Button'
-
-const base = import.meta.env.BASE_URL
+import { BASE_URL } from '@/utils/constants'
 
 interface Props {
   onEnd: () => void
@@ -26,7 +25,7 @@ export function CelebrationVideo({ onEnd }: Props) {
     v.play().catch(() => {})
   }, [s.bgmVolume, s.muted])
 
-  const videoSrc = s.customCelebrationVideoUrl || `${base}videos/celebration.mp4`
+  const videoSrc = s.customCelebrationVideoUrl || `${BASE_URL}videos/celebration.mp4`
 
   return (
     <div style={{

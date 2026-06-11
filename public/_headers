@@ -1,0 +1,4 @@
+# Serve video/audio files with proper Content-Type
+/videos/*
+  Content-Type: video/mp4
+  Cache-Control: public, max-age=31536000

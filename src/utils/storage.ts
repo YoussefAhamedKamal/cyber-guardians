@@ -3,7 +3,8 @@ export function loadFromStorage<T>(key: string, fallback: T): T {
     const raw = localStorage.getItem(key)
     if (!raw) return fallback
     return JSON.parse(raw) as T
-  } catch {
+  } catch (e) {
+    console.warn('Failed to load from storage:', key, e)
     return fallback
   }
 }

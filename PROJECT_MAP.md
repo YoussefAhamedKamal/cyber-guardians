@@ -1,7 +1,8 @@
 # Cyber Guardians — PROJECT MAP
 
 > لعبة تعليمية تفاعلية ثلاثية الأبعاد لتعليم أساسيات الأمن السيبراني للمراهقين
-> الحالة: **🟢 تشغيل وإنتاج (Live on GitHub Pages)**
+> الحالة: **🟢 تشغيل وإنتاج (Live on Cloudflare Pages + GitHub Pages)**
+> الإصدار: **1.1.0** — نشر مزدوج + base ديناميكي
 
 ---
 
@@ -21,7 +22,7 @@
 | 3D Characters | useGLTF (RobotExpressive) + Float + useAnimations | — | نماذج محملة من الإنترنت مع حركات |
 | 3D Environment | Stars + Particles + Grid | — | خلفية نجمية مع جزيئات عائمة |
 | Testing | Vitest | 4.1.7 | 35 اختبار ✅ |
-| Deploy | GitHub Actions → GitHub Pages | — | نشر آلي مع workflow_dispatch |
+| Deploy | **Cloudflare Pages** (auto-deploy via Git) + **GitHub Actions** (→ GitHub Pages) | — | نشر آلي مزدوج مع BASE_URL متغير |
 | AI Music | MiniMax Music 2.6 | — | أوامر توليد موسيقى (Instrumental Mode) |
 
 ### قيود تقنية
@@ -30,7 +31,11 @@
 - Path aliases: `@/` → `src/`
 - Resolution: responsive 16:9 (base 1200×675)
 - Chunk size: ~1.2MB (Three.js)
-- Deployment base: `/cyber-guardians/`
+- **Deployment base:** ديناميكي — `process.env.BASE_URL \|\| '/'`
+  - Cloudflare: `BASE_URL` غير مضبوط ← `'/'`
+  - GitHub Actions: `BASE_URL = /cyber-guardians/`
+- **SPA fallback:** `public/_redirects` (`/* /index.html 200`)
+- **Video MIME:** `public/_headers` (`Content-Type: video/mp4`)
 
 ---
 
@@ -247,6 +252,13 @@ src/
 | `system.mp4` | النظام — إشعارات وأهداف | فيديو افتراضي |
 | `celebration.mp4` | شاشة الاحتفال | نهاية المستوى 7 |
 
+### ملفات البنية التحتية (deploy)
+| الملف | الوظيفة |
+|---|---|
+| `public/_redirects` | SPA fallback لـ Cloudflare Pages (`/* /index.html 200`) |
+| `public/_headers` | تحديد Content-Type للفيديو (`Content-Type: video/mp4`) |
+| `.github/workflows/deploy.yml` | GitHub Pages deploy (مع BASE_URL env) |
+
 ### ملفات أخرى
 | الملف | الحجم | الاستخدام |
 |---|---|---|
@@ -255,7 +267,6 @@ src/
 | `public/videos/output.wav` | 1.4MB | موسيقى خلفية مخصصة |
 | `public/videos/زين.webp` | — | صورة FLUX لشخصية زين |
 | `PROMPTS.md` | 475+ سطر | أوامر FLUX + مشاهد انتقالية + مشهد النظام |
-| `.github/workflows/deploy.yml` | — | GitHub Pages deploy (Node.js 24) |
 
 ---
 
@@ -352,9 +363,43 @@ src/
 
 ---
 
+## [HOSTING]
+
+### المنصات الحالية (نشر مزدوج)
+| المنصة | الرابط | الآلية | BASE_URL |
+|--------|--------|--------|:--------:|
+| **Cloudflare Pages** | `https://cyber-guardians.pages.dev` | Auto-deploy via Git | `'/'` (افتراضي) |
+| **GitHub Pages** | `https://youssefahamedkamal.github.io/cyber-guardians` | GitHub Actions | `'/cyber-guardians/'` |
+
+### آلية base الديناميكي
+```ts
+// vite.config.ts
+base: process.env.BASE_URL || '/',
+```
+- Cloudflare Pages يبني بدون `BASE_URL` ← `base: '/'` ← الملفات في الجذر ✅
+- GitHub Actions workflow يمرر `BASE_URL = /cyber-guardians/` ← `base: '/cyber-guardians/'` ← تحت مسار المستودع ✅
+- محلياً (`npm run dev`): غير مضبوط ← `base: '/'` ✅
+
+### ملفات النشر
+| الملف | الموقع | الوظيفة |
+|-------|--------|---------|
+| `public/_redirects` | Cloudflare | `/* /index.html 200` — SPA fallback |
+| `public/_headers` | Cloudflare | `Content-Type: video/mp4` — منع 500 للفيديو |
+| `.github/workflows/deploy.yml` | GitHub | build مع `BASE_URL` + نشر إلى GitHub Pages |
+
+---
+
 ## [ORPHANS & PENDING]
 
-### مكتمل
+### مكتمل (v1.1.0)
+- [x] **Cloudflare Pages** — نشر آلي، bandwidth غير محدود، HTTPS مجاني
+- [x] **النشر المزدوج** — Cloudflare + GitHub Pages يشتغلان معاً
+- [x] **Base ديناميكي** — `process.env.BASE_URL || '/'` يعمل على المنصتين بدون تعديل يدوي
+- [x] **SPA fallback** — `public/_redirects` لـ Cloudflare
+- [x] **Video MIME types** — `public/_headers` يمنع HTTP 500 للفيديو
+- [x] **GitHub Actions workflow** — يمرر `BASE_URL` وينشر على GitHub Pages
+
+### مكتمل (سابق)
 - [x] **إعادة المحاولة في كل التحديات** — تم
 - [x] **خلط الأسئلة عشوائياً** — تم (المستويات 1, 6, 7)
 - [x] **فيديو احتفال نهاية اللعبة** — تم (celebration.mp4 + CelebrationVideo)

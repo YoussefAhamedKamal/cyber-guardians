@@ -36,13 +36,13 @@ function migrateFromLocalStorage() {
         const tx = db.transaction(STORE_NAME, 'readwrite')
         tx.objectStore(STORE_NAME).put(JSON.stringify(parsed), key)
         tx.oncomplete = () => db.close()
-      }).catch(() => {})
+      }).catch((e) => { console.error('indexedDB migration (parsed) failed:', e) })
     } catch {
       openDB().then((db) => {
         const tx = db.transaction(STORE_NAME, 'readwrite')
         tx.objectStore(STORE_NAME).put(val, key)
         tx.oncomplete = () => db.close()
-      }).catch(() => {})
+      }).catch((e) => { console.error('indexedDB migration (raw) failed:', e) })
     }
     localStorage.removeItem(key)
   }

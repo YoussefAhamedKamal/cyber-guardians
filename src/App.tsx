@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from 'react'
-const base = import.meta.env.BASE_URL
 import { useResponsive } from '@/hooks'
 import { Button, ProgressBar, DialogueBox, BackgroundVideo, SettingsPanel, CelebrationVideo } from '@/components/ui'
 import { GameCanvas, Environment } from '@/components/three'
@@ -7,8 +6,14 @@ import { useGameStore, useSettingsStore } from '@/store'
 import { levels } from '@/data'
 import { ChallengeRenderer } from '@/challenges'
 import { audio } from '@/systems/ProceduralAudio'
+import { BASE_URL } from '@/utils/constants'
+import type { LevelId } from '@/types'
 
 type Screen = 'menu' | 'levelSelect' | 'dialogue' | 'gameplay' | 'settings' | 'celebration' | 'victory'
+
+function isValidLevel(id: number): id is LevelId {
+  return id >= 1 && id <= 7
+}
 
 export function App() {
   const [screen, setScreen] = useState<Screen>('menu')
@@ -17,22 +22,26 @@ export function App() {
   const game = useGameStore()
   const settings = useSettingsStore()
 
-  const level = levels.find((l) => l.id === game.currentLevel)!
+  const level = levels.find((l) => l.id === game.currentLevel)
   if (!level) return null
 
   useEffect(() => {
-    if (settings.muted || settings.bgmVolume <= 0) return
+    if (settings.muted || settings.bgmMuted || settings.bgmVolume <= 0) return
     let stop: () => void
-    const bgSrc = settings.customBgUrl || `${base}videos/output.wav`
+    const bgSrc = settings.customBgUrl || `${BASE_URL}videos/output.wav`
     stop = audio.playFileBg(bgSrc, settings.bgmVolume)
     return () => stop()
-  }, [settings.bgmVolume, settings.muted, settings.customBgUrl])
+  }, [settings.bgmVolume, settings.bgmMuted, settings.muted, settings.customBgUrl])
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === 'm' || e.key === 'M') {
         e.preventDefault()
         settings.toggleMute()
+      }
+      if (e.key === 'b' || e.key === 'B') {
+        e.preventDefault()
+        settings.toggleBgmMute()
       }
       if (e.key === 'Escape') {
         if (screen !== 'menu') {
@@ -53,7 +62,7 @@ export function App() {
 
   const handleLevelSelect = useCallback((id: number) => {
     audio.playClick()
-    game.setLevel(id as 1 | 2 | 3 | 4 | 5 | 6 | 7)
+    game.setLevel(isValidLevel(id) ? id : 1)
     setDialogueIndex(0)
     setScreen('dialogue')
   }, [game])
@@ -231,6 +240,30 @@ export function App() {
           </Button>
         </div>
       )}
+
+      {/* Version */}
+      <div style={{
+        position: 'fixed', bottom: '16px', left: '16px', zIndex: 9999,
+        color: 'rgba(255,255,255,0.15)', fontSize: '11px', fontFamily: 'monospace', direction: 'ltr',
+      }}>
+        v1.1.0
+      </div>
+
+      {/* BGM toggle button */}
+      <button
+        onClick={() => settings.toggleBgmMute()}
+        title={settings.bgmMuted || settings.muted ? 'تشغيل الموسيقى الخلفية' : 'كتم الموسيقى الخلفية'}
+        style={{
+          position: 'fixed', bottom: '16px', right: '16px', zIndex: 9999,
+          width: '44px', height: '44px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.2)',
+          background: (settings.bgmMuted || settings.muted) ? 'rgba(255,82,82,0.2)' : 'rgba(79,195,247,0.2)',
+          color: '#fff', fontSize: '20px', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backdropFilter: 'blur(6px)',
+        }}
+      >
+        {(settings.bgmMuted || settings.muted) ? '\u{1F507}' : '\u{1F50A}'}
+      </button>
     </div>
   )
 }

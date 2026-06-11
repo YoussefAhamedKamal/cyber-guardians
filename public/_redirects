@@ -1,0 +1,2 @@
+# SPA fallback — existing files served directly, all other routes → index.html
+/*    /index.html   200
